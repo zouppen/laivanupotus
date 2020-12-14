@@ -8,7 +8,7 @@ sovelluksia ei tarvitse asentaa. Vanha nokialainenkin käy.
 
 Tervetuloa laivanupotukseen!
 
-Laivanupotus on kahden pelaajan lautapeli, jossa tarkoituksena on
+Laivanupotus on kahden pelaajan peli, jossa tarkoituksena on
 tuhota vastustajan laivasto.
 
 Voit keskeyttää pelin esittelyn milloin tahansa painamalla ruutua eli
