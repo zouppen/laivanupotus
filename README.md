@@ -1,4 +1,10 @@
-## Laivanupotus puhelinmessa
+# Laivanupotus puhelimessa
+
+Tätä peliä pelattaisiin soittamalla puhelimella tiettyyn
+numeroon. Puhelinnumero on siis oikeassa televerkossa eli mitään
+sovelluksia ei tarvitse asentaa. Vanha nokialainenkin käy.
+
+## Käsikirjoitus
 
 Tervetuloa laivanupotukseen!
 
