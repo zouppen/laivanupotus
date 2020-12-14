@@ -21,14 +21,15 @@ vastustajasi on Hacklabin puhelinvaihteessa asuva pieni
 varustamoyrittäjä, jonka satunnaislukugeneraattori on huippuunsa
 viritetty.
 
-Peliä pelataan kahdella pelialueella joka kumpikin on jaettu 10 kertaa
+Peliä pelataan kahdella pelialueella, joka kumpikin on jaettu 10 kertaa
 10 ruutuun. Niitä vastaavat puhelimesi näppäimet nollasta
 yhdeksään. Ensin annetaan vaakakoordinaatti ja sen jälkeen
 pystykoordinaatti. Vasen ylänurkka on koordinaatti 0 0 ja vastaavasti
 oikea alanurkka 9 9.
 
-Peli aloitetaan sijoittamalla oikeanpuoleiseen ruudukkoon omat laivat
-jotka ovat:
+Ensimmäinen pelialue on omia ja toinen vastustajan laivoja
+varten. Peli aloitetaan sijoittamalla ensimmäiseen ruudukkoon omat
+laivat jotka ovat:
 
 * 1 lentotukialus, kooltaan 5 ruutua pitkä
 * 1 taistelulaiva, kooltaan 4 ruutua pitkä
