@@ -71,9 +71,11 @@ Sinulla on neljä alusta jäljellä.
 ## Virheessä
 
 *virheääni* Pelitilanne on mahdoton. Teitkö virheen laivojen
-asettelussa, yritätkö huijata vai näppäilitkö vaan väärin? Paina yksi,
-jos huti, kaksi jos osui ja kolme, jos osui ja upposi. Paina ruutua
-luovuttaaksesi.
+asettelussa, yritätkö huijata vai näppäilitkö vaan väärin?
+
+Tietokone hyökkää siis koordinaattiin kolme yhdeksän. Toistan: Kolme
+yhdeksän. Paina yksi, jos huti, kaksi jos osui ja kolme, jos osui ja
+upposi. Paina ruutua luovuttaaksesi.
 
 ## Voitto / tappio
 
