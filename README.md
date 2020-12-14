@@ -24,11 +24,11 @@ oikea alanurkka 9 9.
 Peli aloitetaan sijoittamalla oikeanpuoleiseen ruudukkoon omat laivat
 jotka ovat:
 
-1 lentotukialus, kooltaan 5 ruutua pitkä
-1 taistelulaiva, kooltaan 4 ruutua pitkä
-2 risteilijää, kooltaan 3 ruutua pitkä
-1 hävittäjä, kooltaan 2 ruutua pitkä
-1 sukellusvene, kooltaan 1 ruutu
+* 1 lentotukialus, kooltaan 5 ruutua pitkä
+* 1 taistelulaiva, kooltaan 4 ruutua pitkä
+* 2 risteilijää, kooltaan 3 ruutua pitkä
+* 1 hävittäjä, kooltaan 2 ruutua pitkä
+* 1 sukellusvene, kooltaan 1 ruutu
 
 Paina tähteä toistaaksesi luettelon.
 
