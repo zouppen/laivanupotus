@@ -43,7 +43,7 @@ strikes = [ (boat1, [ ((0,0), Sink)
                     , ((3,3), Miss)
                     , ((5,1), Miss)
                     , ((4,3), Hit)
-                    , ((4,1), Hit) -- Rehit? What should be done? Now it's Miss.
+                    , ((4,1), Miss) -- Rehit? What should be done? Now it's Miss.
                     , ((4,2), Sink)
                     ])
           ]
@@ -54,8 +54,27 @@ testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat boat) s
   where hitter remBoat (xy,expect) = toTuple expect $ strike (Coordinate xy) remBoat
         toTuple expect StrikeResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
 
+-- Clearance tests (simple)
+
+clearances = [ ((0,0), [(-1,-1)
+                       ,(1,1)
+                       ,(-1,1)
+                       ,(1,-1)
+                       ])
+             , ((5,2), [(6,3)
+                       ,(4,3)
+                       ,(6,1)
+                       ,(4,1)
+                       ])
+             ]
+                       
+testClearances = TestList $ map toCase clearances
+  where toCase (coord,expected) = TestCase $ assertEqual ("Clearances of " ++ show coord) (sort $ map Coordinate expected) (sort $ toClearance $ Coordinate coord)
+
 tests = TestList [ testBoatCreation
                  , testStrikes
+                 , testClearances
                  ]
+
 
 main = runTestTT tests

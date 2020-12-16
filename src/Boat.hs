@@ -17,7 +17,7 @@ data StrikeResult = StrikeResult { outcome   :: Outcome
 
 newtype RenderedBoat = RenderedBoat [Coordinate] deriving (Show, Eq)
 
-newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq)
+newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
 -- |Create free-form boat, used in unit tests.
 freeformBoat :: [(Int,Int)] -> RenderedBoat
@@ -38,3 +38,8 @@ strike x (RenderedBoat before) = StrikeResult outcome $ RenderedBoat after
                   else if null after
                        then Sink
                        else Hit
+
+-- |Rectangular clearance, not including diagonal as in some hose
+-- rules.
+toClearance :: Coordinate -> [Coordinate]
+toClearance (Coordinate (x,y)) = [Coordinate (x',y') | x' <- [x-1, x+1], y' <- [y-1, y+1]]
