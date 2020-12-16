@@ -12,21 +12,21 @@ boat1 = Boat { boatX = 0
              , boatOrientation = Horizontal
              }
 
-boatH = Boat { boatX = 5
+boat4h = Boat { boatX = 5
              , boatY = 3
              , boatLength = 4
              , boatOrientation = Horizontal
              }
 
-boatV = Boat { boatX = 4
-             , boatY = 1
-             , boatLength = 3
-             , boatOrientation = Vertical
-             }
+boat3v = Boat { boatX = 4
+              , boatY = 1
+              , boatLength = 3
+              , boatOrientation = Vertical
+              }
 
 boatPairs = [(boat1, [(0,0)])
-            ,(boatH, [(5,3), (6,3), (7,3), (8,3)])
-            ,(boatV, [(4,1), (4,2), (4,3)])
+            ,(boat4h, [(5,3), (6,3), (7,3), (8,3)])
+            ,(boat3v, [(4,1), (4,2), (4,3)])
             ]
 
 testBoatCreation = TestList $ map test boatPairs
@@ -39,13 +39,13 @@ strikes = [ (boat1, [ ((0,0), Sink)
                     ])
           , (boat1, [ ((0,1), Miss)
                     ])
-          , (boatV, [ ((4,1), Hit)
-                    , ((3,3), Miss)
-                    , ((5,1), Miss)
-                    , ((4,3), Hit)
-                    , ((4,1), Miss) -- Rehit? What should be done? Now it's Miss.
-                    , ((4,2), Sink)
-                    ])
+          , (boat3v, [ ((4,1), Hit)
+                     , ((3,3), Miss)
+                     , ((5,1), Miss)
+                     , ((4,3), Hit)
+                     , ((4,1), Miss) -- Rehit? What should be done? Now it's Miss.
+                     , ((4,2), Sink)
+                     ])
           ]
 
 testStrikes = TestList $ map testStrike strikes
@@ -61,17 +61,17 @@ clearances = [ (boat1, [(0,-1)
                        ,(-1,0)
                        ,(1,-0)
                        ])
-             , (boatH, [(5,2)
-                       ,(6,2)
-                       ,(7,2)
-                       ,(8,2)
-                       ,(5,4)
-                       ,(6,4)
-                       ,(7,4)
-                       ,(8,4)
-                       ,(4,3)
-                       ,(9,3)
-                       ])
+             , (boat4h, [(5,2)
+                        ,(6,2)
+                        ,(7,2)
+                        ,(8,2)
+                        ,(5,4)
+                        ,(6,4)
+                        ,(7,4)
+                        ,(8,4)
+                        ,(4,3)
+                        ,(9,3)
+                        ])
              ]
                        
 testClearances = TestList $ map toCase clearances
@@ -85,16 +85,16 @@ bounds = [ (boat1, True, Board{ minX = 0
                               , maxX = 0
                               , maxY = 0
                               })
-         , (boatV, True, Board{ minX = 40
-                              , minY = 1
-                              , maxX = 4
-                              , maxY = 3
-                              })
-         , (boatV, False, Board{ minX = 0
-                               , minY = 0
-                               , maxX = 9
-                               , maxY = 2
+         , (boat3v, True, Board{ minX = 40
+                               , minY = 1
+                               , maxX = 4
+                               , maxY = 3
                                })
+         , (boat3v, False, Board{ minX = 0
+                                , minY = 0
+                                , maxX = 9
+                                , maxY = 2
+                                })
          ]
 
 testBounds = TestList $ map toCase bounds
