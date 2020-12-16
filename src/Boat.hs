@@ -1,6 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 module Boat where
 
+import Data.Set (Set, (\\), fromList, toList)
+import qualified Data.Set as S
+
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
 data Outcome = Miss | Hit | Sink deriving (Show, Eq)
@@ -12,34 +15,43 @@ data Boat = Boat { boatX           :: Int
                  } deriving (Show, Eq)
 
 data StrikeResult = StrikeResult { outcome   :: Outcome
-                                 , boatAfter :: RenderedBoat
+                                 , boatAfter :: Target
                                  } deriving (Show, Eq)
 
-newtype RenderedBoat = RenderedBoat [Coordinate] deriving (Show, Eq)
+-- |Target is a rendered ship, set of coordinates
+newtype Target = Target (Set Coordinate) deriving (Show, Eq)
 
+-- |Clearance is a set of points surrounding targets
+newtype Clearance = Clearance (Set Coordinate) deriving (Show, Eq)
+
+-- |Coordinate is (x,y)
 newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
 -- |Create free-form boat, used in unit tests.
-freeformBoat :: [(Int,Int)] -> RenderedBoat
-freeformBoat xs = RenderedBoat $ map Coordinate xs
+freeformBoat :: [(Int,Int)] -> Target
+freeformBoat xs = Target $ fromList $ map Coordinate xs
 
 -- |Render a boat from boat definition
-renderBoat :: Boat -> RenderedBoat
-renderBoat Boat{..} = RenderedBoat $ case boatOrientation of
+renderBoat :: Boat -> Target
+renderBoat Boat{..} = Target $ fromList $ case boatOrientation of
   Horizontal -> [ Coordinate (x , boatY) | x <- take boatLength [boatX..]]
   Vertical   -> [ Coordinate (boatX , y) | y <- take boatLength [boatY..]]
 
 -- |Try to hit the boat
-strike :: Coordinate -> RenderedBoat -> StrikeResult
-strike x (RenderedBoat before) = StrikeResult outcome $ RenderedBoat after
-  where after = filter (/= x) before
-        outcome = if after == before
-                  then Miss
-                  else if null after
+strike :: Coordinate -> Target -> StrikeResult
+strike x (Target before) = StrikeResult outcome $ Target after
+  where after = S.delete x before
+        outcome = if S.member x before
+                  then if S.null after
                        then Sink
                        else Hit
+                  else Miss
 
--- |Rectangular clearance, not including diagonal as in some hose
--- rules.
-toClearance :: Coordinate -> [Coordinate]
-toClearance (Coordinate (x,y)) = [Coordinate (x',y') | x' <- [x-1, x+1], y' <- [y-1, y+1]]
+-- |Nudge coordinates by given constant
+nudge :: Int -> Int -> Set Coordinate -> Set Coordinate
+nudge x0 y0 = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
+
+-- |Clearance coordinates around the ship
+clearance :: Target -> Clearance
+clearance (Target s) = Clearance $ S.unions [nudge x y s | x <- [-1, 1], y <- [-1, 1]] \\ s
+
