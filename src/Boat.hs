@@ -27,9 +27,9 @@ newtype Clearance = Clearance (Set Coordinate) deriving (Show, Eq)
 -- |Coordinate is (x,y)
 newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
--- |Create free-form boat, used in unit tests.
-freeformBoat :: [(Int,Int)] -> Target
-freeformBoat xs = Target $ fromList $ map Coordinate xs
+-- |Create free-form boat or clearance, used in unit tests.
+freeform :: [(Int,Int)] -> Set Coordinate
+freeform xs = fromList $ map Coordinate xs
 
 -- |Render a boat from boat definition
 renderBoat :: Boat -> Target
@@ -48,10 +48,9 @@ strike x (Target before) = StrikeResult outcome $ Target after
                   else Miss
 
 -- |Nudge coordinates by given constant
-nudge :: Int -> Int -> Set Coordinate -> Set Coordinate
-nudge x0 y0 = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
+nudge :: (Int, Int) -> Set Coordinate -> Set Coordinate
+nudge (x0,y0) = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
 
 -- |Clearance coordinates around the ship
 clearance :: Target -> Clearance
-clearance (Target s) = Clearance $ S.unions [nudge x y s | x <- [-1, 1], y <- [-1, 1]] \\ s
-
+clearance (Target s) = Clearance $ S.unions [nudge n s | n <- [(0,1), (0,-1), (1,0), (-1,0)]] \\ s

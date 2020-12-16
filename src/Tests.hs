@@ -30,7 +30,7 @@ boatPairs = [(boat1, [(0,0)])
             ]
 
 testBoatCreation = TestList $ map test boatPairs
-  where test (boat,reference) = TestCase $ assertEqual (show boat) (freeformBoat reference) (renderBoat boat)
+  where test (boat,reference) = TestCase $ assertEqual (show boat) (Target $ freeform reference) (renderBoat boat)
 
 -- Boat hit tests
 
@@ -54,27 +54,35 @@ testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat boat) s
   where hitter remBoat (xy,expect) = toTuple expect $ strike (Coordinate xy) remBoat
         toTuple expect StrikeResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
 
--- Clearance tests (simple)
+-- Clearance tests
 
-clearances = [ ((0,0), [(-1,-1)
-                       ,(1,1)
-                       ,(-1,1)
-                       ,(1,-1)
+clearances = [ (boat1, [(0,-1)
+                       ,(0,1)
+                       ,(-1,0)
+                       ,(1,-0)
                        ])
-             , ((5,2), [(6,3)
+             , (boatH, [(5,2)
+                       ,(6,2)
+                       ,(7,2)
+                       ,(8,2)
+                       ,(5,4)
+                       ,(6,4)
+                       ,(7,4)
+                       ,(8,4)
                        ,(4,3)
-                       ,(6,1)
-                       ,(4,1)
+                       ,(9,3)
                        ])
              ]
                        
 testClearances = TestList $ map toCase clearances
-  where toCase (coord,expected) = TestCase $ assertEqual ("Clearances of " ++ show coord) (sort $ map Coordinate expected) (sort $ toClearance $ Coordinate coord)
+  where toCase (boat,expected) = TestCase $
+          (assertEqual $ "Clearances of " ++ show boat)
+          (Clearance $ freeform expected)
+          (clearance $ renderBoat boat)
 
 tests = TestList [ testBoatCreation
                  , testStrikes
                  , testClearances
                  ]
-
 
 main = runTestTT tests
