@@ -28,7 +28,7 @@ boatPairs = [
   ]
 
 testBoatCreation = TestList $ map test boatPairs
-  where test (boat,result) = TestCase $ assertEqual (show boat) (RenderedBoat result) (renderBoat boat)
+  where test (boat,reference) = TestCase $ assertEqual (show boat) (freeformBoat reference) (renderBoat boat)
 
 tests = testBoatCreation
 
