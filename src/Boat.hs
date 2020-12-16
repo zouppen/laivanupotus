@@ -3,11 +3,17 @@ module Boat where
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
+data Outcome = Miss | Hit | Sink deriving (Show, Eq)
+
 data Boat = Boat { boatX           :: Int
                  , boatY           :: Int
                  , boatLength      :: Int
                  , boatOrientation :: BoatOrientation
                  } deriving (Show, Eq)
+
+data StrikeResult = StrikeResult { outcome   :: Outcome
+                                 , boatAfter :: RenderedBoat
+                                 } deriving (Show, Eq)
 
 newtype RenderedBoat = RenderedBoat [Coordinate] deriving (Show, Eq)
 
@@ -22,3 +28,13 @@ renderBoat :: Boat -> RenderedBoat
 renderBoat Boat{..} = RenderedBoat $ case boatOrientation of
   Horizontal -> [ Coordinate (x , boatY) | x <- take boatLength [boatX..]]
   Vertical   -> [ Coordinate (boatX , y) | y <- take boatLength [boatY..]]
+
+-- |Try to hit the boat
+strike :: Coordinate -> RenderedBoat -> StrikeResult
+strike x (RenderedBoat before) = StrikeResult outcome $ RenderedBoat after
+  where after = filter (/= x) before
+        outcome = if after == before
+                  then Miss
+                  else if null after
+                       then Sink
+                       else Hit
