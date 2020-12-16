@@ -18,6 +18,12 @@ data StrikeResult = StrikeResult { outcome   :: Outcome
                                  , boatAfter :: Target
                                  } deriving (Show, Eq)
 
+data Board = Board { minX :: Int
+                   , minY :: Int
+                   , maxX :: Int
+                   , maxY :: Int
+                   } deriving (Show, Eq)
+
 -- |Target is a rendered ship, set of coordinates
 newtype Target = Target (Set Coordinate) deriving (Show, Eq)
 
@@ -54,3 +60,7 @@ nudge (x0,y0) = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
 -- |Clearance coordinates around the ship
 clearance :: Target -> Clearance
 clearance (Target s) = Clearance $ S.unions [nudge n s | n <- [(0,1), (0,-1), (1,0), (-1,0)]] \\ s
+
+checkBoundary :: Board -> Target -> Bool
+checkBoundary Board{..} (Target s) = S.foldr' (\x acc -> acc && bounds x) True s
+  where bounds (Coordinate (x,y)) = x >= minX && x <= maxX && y >= minY && y <= maxY

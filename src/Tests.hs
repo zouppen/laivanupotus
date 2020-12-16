@@ -80,9 +80,33 @@ testClearances = TestList $ map toCase clearances
           (Clearance $ freeform expected)
           (clearance $ renderBoat boat)
 
+bounds = [ (boat1, True, Board{ minX = 0
+                              , minY = 0
+                              , maxX = 0
+                              , maxY = 0
+                              })
+         , (boatV, True, Board{ minX = 40
+                              , minY = 1
+                              , maxX = 4
+                              , maxY = 3
+                              })
+         , (boatV, False, Board{ minX = 0
+                               , minY = 0
+                               , maxX = 9
+                               , maxY = 2
+                               })
+         ]
+
+testBounds = TestList $ map toCase bounds
+  where toCase (boat, expected, board) = TestCase $
+          (assertEqual $ "Boundaries of " ++ show boat ++ " and "  ++ show board)
+          expected
+          (checkBoundary board $ renderBoat boat)
+       
 tests = TestList [ testBoatCreation
                  , testStrikes
                  , testClearances
+                 , testBounds
                  ]
 
 main = runTestTT tests
