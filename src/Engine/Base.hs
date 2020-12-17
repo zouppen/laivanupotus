@@ -15,8 +15,8 @@ renderBoat Boat{..} = Target $ fromList $ case boatOrientation of
   Vertical   -> [ Coordinate (boatX , y) | y <- take boatLength [boatY..]]
 
 -- |Try to hit the boat
-strikeTarget :: Coordinate -> Target -> StrikeResult
-strikeTarget x (Target before) = StrikeResult outcome $ Target after
+strikeTarget :: Coordinate -> Target -> StrikeTargetResult
+strikeTarget x (Target before) = StrikeTargetResult outcome $ Target after
   where after = S.delete x before
         outcome = if S.member x before
                   then if S.null after

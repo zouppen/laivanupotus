@@ -14,9 +14,9 @@ data Boat = Boat { boatX           :: Int
                  , boatOrientation :: BoatOrientation
                  } deriving (Show, Eq)
 
-data StrikeResult = StrikeResult { outcome   :: Outcome
-                                 , boatAfter :: Target
-                                 } deriving (Show, Eq)
+data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
+                                             , boatAfter :: Target
+                                             } deriving (Show, Eq)
 
 data Board = Board { minX :: Int
                    , minY :: Int
