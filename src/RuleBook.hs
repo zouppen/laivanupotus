@@ -1,19 +1,14 @@
 -- Some common configurable rules for a game.
-module RuleBook ( shipsetFin
-                , shipsetBradley
-                , teleBoard
-                , classicBoard
-                ) where
+module RuleBook where
 
-import Data.List (sort)
 import Types
-import Boat.Internal
+import Boat.Internal (mkShipset)
 
 -- |Finnish style https://fi.wikipedia.org/wiki/Laivanupotus
-shipsetFin     = Shipset [1, 2, 3, 3, 4, 5]
+shipsetFin     = mkShipset [1, 2, 3, 3, 4, 5]
 
 -- |Bradley rules https://en.wikipedia.org/wiki/Battleship_(game)
-shipsetBradley = Shipset [2, 3, 3, 4, 5]    
+shipsetBradley = mkShipset [2, 3, 3, 4, 5]    
 
 -- |Board played on the telephone (keys 0-9, not 1-10)
 teleBoard = Board { minX = 0
@@ -29,6 +24,3 @@ classicBoard = Board { minX = 1
                      , maxY = 10
                      }
 
--- |Create own shipset by defining ship counts
-ownShipset :: [Int] -> Shipset
-ownShipset ss = Shipset $ sort ss
