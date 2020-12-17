@@ -8,6 +8,10 @@ import qualified Data.Set as S
 import Types
 import Engine.Internal
 
+data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
+                                             , boatAfter :: Target
+                                             } deriving (Show, Eq)
+
 -- |Render a boat from boat definition
 renderBoat :: Boat -> Target
 renderBoat Boat{..} = Target $ fromList $ case boatOrientation of

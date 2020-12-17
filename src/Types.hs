@@ -1,4 +1,16 @@
-module Types where
+module Types ( Board(..)
+             , Boat(..)
+             , BoatOrientation(..)
+             , Game(..)
+             , LayoutFailure(..)
+             , Outcome(..)
+             , Rules(..)
+             -- Re-exports
+             , Coordinate
+             , KeepoutZone
+             , Shipset
+             , Target
+             ) where
 
 import Data.Map.Strict (Map)
 
@@ -13,10 +25,6 @@ data Boat = Boat { boatX           :: Int
                  , boatLength      :: Int
                  , boatOrientation :: BoatOrientation
                  } deriving (Show, Eq)
-
-data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
-                                             , boatAfter :: Target
-                                             } deriving (Show, Eq)
 
 data Board = Board { minX :: Int
                    , minY :: Int
