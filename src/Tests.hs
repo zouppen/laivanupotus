@@ -56,6 +56,12 @@ boat3x = Boat { boatX = 7
               , boatOrientation = Vertical
               }
 
+boat4out = Boat { boatX = 7
+                , boatY = 7
+                , boatLength = 4
+                , boatOrientation = Vertical
+                }
+
 -- Boat creation tests
 
 boatPairs = [(boat1, [(0,0)])
@@ -167,6 +173,18 @@ testClearancesFull = TestList
   , True ~=? checkClear' [boat5v, boat4h, boat3w, boat3w, boat2h] -- Invalid boat overlap but valid clearance
   ]
 
+-- Whole board test
+
+testAll = checkRules teleBoard shipsetFin
+
+testAllRules = TestList
+  [ Nothing ~=? testAll [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game
+  , Just Overlapping ~=? testAll [boat5v, boat4h, boat3w, boat3w, boat2h] -- Invalid boat overlap but valid clearance
+  , Just CountMismatch ~=? testAll []
+  , Just OutOfBounds ~=? testAll [boat4out]
+  , Just TooClose ~=? testAll [boat5v, boat4h, boat3v, boat3h, boat2h, boat1] -- Too close of another ship
+  ]
+
 -- Group all tests
 
 tests = TestList [ testBoatCreation
@@ -176,6 +194,7 @@ tests = TestList [ testBoatCreation
                  , testShipCount
                  , overlapTestSubjects
                  , testClearancesFull
+                 , testAllRules
                  ]
 
 main = runTestTT tests

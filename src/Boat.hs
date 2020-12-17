@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Boat where
 
+import Data.Monoid (getFirst)
 import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
@@ -25,6 +26,8 @@ data Board = Board { minX :: Int
                    , maxY :: Int
                    } deriving (Show, Eq)
 
+data LayoutFailure = OutOfBounds | Overlapping | TooClose | CountMismatch deriving (Show, Eq)
+
 -- |Target is a rendered ship, set of coordinates
 newtype Target = Target (Set Coordinate) deriving (Show, Eq)
 
@@ -36,8 +39,16 @@ newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
 newtype Shipset = Shipset [Int] deriving (Show, Eq, Ord)
 
+-- Some common setups
+
 shipsetFin     = Shipset [1, 2, 3, 3, 4, 5] -- Finnish style https://fi.wikipedia.org/wiki/Laivanupotus
 shipsetBradley = Shipset [2, 3, 3, 4, 5]    -- Bradley rules https://en.wikipedia.org/wiki/Battleship_(game)
+
+teleBoard = Board { minX = 0
+                  , minY = 0
+                  , maxX = 9
+                  , maxY = 9
+                  } -- Board played on the telephone (keys 0-9, not 1-10)
 
 -- |Create free-form boat or clearance, used in unit tests.
 freeform :: [(Int,Int)] -> Set Coordinate
@@ -91,3 +102,16 @@ checkClearance targets = S.null $ targetSet `S.intersection` clearanceSet
 -- some helpers
 unwrapT (Target a) = a
 unwrapC (Clearance a) = a
+
+-- |Check multitude of errors. Returns Nothing if all is fine. Using
+-- First monoid (stops and collect only first error).
+checkRules :: Board -> Shipset -> [Boat] -> Maybe LayoutFailure
+checkRules board shipset boats = getFirst $
+  mconcat (map checkBoundaryMsg targets) <>
+  check Overlapping (checkOverlap targets) <>
+  check TooClose (checkClearance targets) <>
+  check CountMismatch (checkShipCount shipset boats)
+  where targets = map renderBoat boats
+        checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
+        check _ True  = mempty
+        check a False = pure a
