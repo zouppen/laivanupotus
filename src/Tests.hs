@@ -113,7 +113,7 @@ bounds = [ (boat1, True, Board{ minX = 0
                               , maxX = 0
                               , maxY = 0
                               })
-         , (boat3v, True, Board{ minX = 40
+         , (boat3v, True, Board{ minX = 4
                                , minY = 1
                                , maxX = 4
                                , maxY = 3
