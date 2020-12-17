@@ -79,6 +79,15 @@ checkShipCount (Shipset ss) boats = ss == (sort $ map boatLength boats)
 -- |Check that the boats are not on each other
 checkOverlap :: [Target] -> Bool
 checkOverlap targets = individualSize == unionSize
-  where individualSize = sum (map (S.size . unwrap) targets)
-        unionSize = S.size $ S.unions $ map unwrap targets
-        unwrap (Target a) = a
+  where individualSize = sum (map (S.size . unwrapT) targets)
+        unionSize = S.size $ S.unions $ map unwrapT targets
+
+-- |Check that clearance areas are not touching any boats
+checkClearance :: [Target] -> Bool
+checkClearance targets = S.null $ targetSet `S.intersection` clearanceSet
+  where targetSet = S.unions $ map unwrapT targets
+        clearanceSet = S.unions $ map (unwrapC . clearance) targets
+
+-- some helpers
+unwrapT (Target a) = a
+unwrapC (Clearance a) = a

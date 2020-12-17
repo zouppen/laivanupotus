@@ -88,7 +88,7 @@ testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat boat) s
   where hitter remBoat (xy,expect) = toTuple expect $ strike (Coordinate xy) remBoat
         toTuple expect StrikeResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
 
--- Clearance tests
+-- Clearance area test, single boat
 
 clearances = [ (boat1, [(0,-1)
                        ,(0,1)
@@ -155,6 +155,18 @@ overlapTestSubjects = TestList
   , True ~=? checkOverlap' [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game
   ]
 
+-- Clearances
+
+checkClear' = checkClearance . map renderBoat
+
+testClearancesFull = TestList
+  [ True ~=? checkClear' []
+  , True ~=? checkClear' [boat5v]
+  , True ~=? checkClear' [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game
+  , False ~=? checkClear' [boat5v, boat4h, boat3v, boat3h, boat2h, boat1]
+  , True ~=? checkClear' [boat5v, boat4h, boat3w, boat3w, boat2h] -- Invalid boat overlap but valid clearance
+  ]
+
 -- Group all tests
 
 tests = TestList [ testBoatCreation
@@ -163,6 +175,7 @@ tests = TestList [ testBoatCreation
                  , testBounds
                  , testShipCount
                  , overlapTestSubjects
+                 , testClearancesFull
                  ]
 
 main = runTestTT tests
