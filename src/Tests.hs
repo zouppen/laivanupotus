@@ -50,6 +50,12 @@ boat1 = Boat { boatX = 0
              , boatOrientation = Horizontal
              }
 
+boat3x = Boat { boatX = 7
+              , boatY = 2
+              , boatLength = 3
+              , boatOrientation = Vertical
+              }
+
 -- Boat creation tests
 
 boatPairs = [(boat1, [(0,0)])
@@ -139,6 +145,16 @@ testShipCount = TestList
   , False ~=? checkShipCount shipsetFin [boat5v, boat4h, boat3v, boat3w, boat3h, boat2h]
   ]
 
+checkOverlap' = checkOverlap . map renderBoat
+
+overlapTestSubjects = TestList
+  [ True ~=? checkOverlap' []
+  , True ~=? checkOverlap' [boat5v]
+  , False ~=? checkOverlap' [boat5v, boat4h, boat3x, boat3w, boat2h]
+  , False ~=? checkOverlap' [boat5v, boat4h, boat3w, boat3w, boat2h]
+  , True ~=? checkOverlap' [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game
+  ]
+
 -- Group all tests
 
 tests = TestList [ testBoatCreation
@@ -146,6 +162,7 @@ tests = TestList [ testBoatCreation
                  , testClearances
                  , testBounds
                  , testShipCount
+                 , overlapTestSubjects
                  ]
 
 main = runTestTT tests

@@ -72,5 +72,13 @@ checkBoundary :: Board -> Target -> Bool
 checkBoundary Board{..} (Target s) = S.foldr' (\x acc -> acc && bounds x) True s
   where bounds (Coordinate (x,y)) = x >= minX && x <= maxX && y >= minY && y <= maxY
 
+-- |Check if the ship count matches game specs
 checkShipCount :: Shipset -> [Boat] -> Bool
 checkShipCount (Shipset ss) boats = ss == (sort $ map boatLength boats)
+
+-- |Check that the boats are not on each other
+checkOverlap :: [Target] -> Bool
+checkOverlap targets = individualSize == unionSize
+  where individualSize = sum (map (S.size . unwrap) targets)
+        unionSize = S.size $ S.unions $ map unwrap targets
+        unwrap (Target a) = a
