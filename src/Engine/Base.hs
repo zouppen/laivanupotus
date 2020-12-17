@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 module Engine.Base where
 
-import Data.Monoid (getFirst)
 import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
@@ -54,18 +53,6 @@ checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSe
   where targetSet = S.unions $ map unwrapT targets
         clearanceSet = S.unions $ map (unwrapC . clearance keepout) targets
 
--- |Check multitude of errors. Returns Nothing if all is fine. Using
--- First monoid (stops and collect only first error).
-checkRules :: Rules -> [Boat] -> Maybe LayoutFailure
-checkRules Rules{..} boats = getFirst $
-  mconcat (map checkBoundaryMsg targets) <>
-  check Overlapping (checkOverlap targets) <>
-  check TooClose (checkClearance keepout targets) <>
-  check CountMismatch (checkShipCount shipset boats)
-  where targets = map renderBoat boats
-        checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
-        check _ True  = mempty
-        check a False = pure a
 
 -- some helpers
 unwrapT (Target a) = a

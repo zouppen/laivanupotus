@@ -6,6 +6,7 @@ import Data.List
 import Test.HUnit
 import Types
 import RuleBook
+import Engine
 import Engine.Base
 import Engine.Internal
 
