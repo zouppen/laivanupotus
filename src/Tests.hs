@@ -128,7 +128,7 @@ testClearances = TestList $ map toCase clearances
   where toCase (boat,expected) = TestCase $
           (assertEqual $ "Clearances of " ++ show boat)
           (Clearance $ freeform expected)
-          (clearance $ renderBoat boat)
+          (clearance adjacentKeepout $ renderBoat boat)
 
 bounds = [ (boat1, True, Board{ minX = 0
                               , minY = 0
@@ -173,7 +173,8 @@ overlapTestSubjects = TestList
 
 -- Clearances
 
-checkClear' = checkClearance . map renderBoat
+checkClear' = checkClearance adjacentKeepout . map renderBoat
+checkClearFull = checkClearance fullKeepout . map renderBoat
 
 testClearancesFull = TestList
   [ True ~=? checkClear' []
@@ -181,11 +182,13 @@ testClearancesFull = TestList
   , True ~=? checkClear' [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game
   , False ~=? checkClear' [boat5v, boat4h, boat3v, boat3h, boat2h, boat1]
   , True ~=? checkClear' [boat5v, boat4h, boat3w, boat3w, boat2h] -- Invalid boat overlap but valid clearance
+  , False ~=? checkClearFull [boat4h, boat3w] -- Full clearout should fail. Are diagonally positioned
+  , True ~=? checkClearFull [boat2h, boat3w] -- Full clearout, are one position off
   ]
 
 -- Whole board test
 
-testAll = checkRules teleBoard shipsetFin
+testAll = checkRules teleBoard shipsetFin adjacentKeepout
 
 testAllRules = TestList
   [ Nothing ~=? testAll [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game

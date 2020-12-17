@@ -2,7 +2,7 @@
 module RuleBook where
 
 import Types
-import Boat.Internal (mkShipset)
+import Boat.Internal (mkShipset, KeepoutZone(..))
 
 -- |Finnish style https://fi.wikipedia.org/wiki/Laivanupotus
 shipsetFin     = mkShipset [1, 2, 3, 3, 4, 5]
@@ -24,3 +24,9 @@ classicBoard = Board { minX = 1
                      , maxY = 10
                      }
 
+-- |Adjacent keepout zone. The most common rule. The boats may not
+-- touch each other, but diagonal placement allowed
+adjacentKeepout = KeepoutZone [(0,1), (0,-1), (1,0), (-1,0)]
+
+-- |Full keepout. The boats must not touch even diagonally.
+fullKeepout = KeepoutZone [(0,1), (0,-1), (1,0), (-1,0), (-1,-1), (-1,1), (1,1), (1,-1)]

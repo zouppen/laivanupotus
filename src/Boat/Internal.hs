@@ -14,6 +14,9 @@ newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
 newtype Shipset = Shipset [Int] deriving (Show, Eq, Ord)
 
+-- |Keepout zone
+newtype KeepoutZone = KeepoutZone [(Int,Int)] deriving (Show)
+
 -- some helpers
 unwrapT (Target a) = a
 unwrapC (Clearance a) = a

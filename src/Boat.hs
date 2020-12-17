@@ -30,8 +30,8 @@ nudge :: (Int, Int) -> Set Coordinate -> Set Coordinate
 nudge (x0,y0) = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
 
 -- |Clearance coordinates around the ship
-clearance :: Target -> Clearance
-clearance (Target s) = Clearance $ S.unions [nudge n s | n <- [(0,1), (0,-1), (1,0), (-1,0)]] \\ s
+clearance :: KeepoutZone -> Target -> Clearance
+clearance (KeepoutZone keepout) (Target s) = Clearance $ S.unions [nudge n s | n <- keepout] \\ s
 
 -- |Check that target fits on board
 checkBoundary :: Board -> Target -> Bool
@@ -49,18 +49,18 @@ checkOverlap targets = individualSize == unionSize
         unionSize = S.size $ S.unions $ map unwrapT targets
 
 -- |Check that clearance areas are not touching any boats
-checkClearance :: [Target] -> Bool
-checkClearance targets = S.null $ targetSet `S.intersection` clearanceSet
+checkClearance :: KeepoutZone -> [Target] -> Bool
+checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSet
   where targetSet = S.unions $ map unwrapT targets
-        clearanceSet = S.unions $ map (unwrapC . clearance) targets
+        clearanceSet = S.unions $ map (unwrapC . clearance keepout) targets
 
 -- |Check multitude of errors. Returns Nothing if all is fine. Using
 -- First monoid (stops and collect only first error).
-checkRules :: Board -> Shipset -> [Boat] -> Maybe LayoutFailure
-checkRules board shipset boats = getFirst $
+checkRules :: Board -> Shipset -> KeepoutZone -> [Boat] -> Maybe LayoutFailure
+checkRules board shipset keepout boats = getFirst $
   mconcat (map checkBoundaryMsg targets) <>
   check Overlapping (checkOverlap targets) <>
-  check TooClose (checkClearance targets) <>
+  check TooClose (checkClearance keepout targets) <>
   check CountMismatch (checkShipCount shipset boats)
   where targets = map renderBoat boats
         checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
