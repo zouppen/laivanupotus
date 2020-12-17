@@ -2,7 +2,7 @@
 module RuleBook where
 
 import Types
-import Boat.Internal (mkShipset, KeepoutZone(..))
+import Engine.Internal (mkShipset, KeepoutZone(..))
 
 -- |Finnish style https://fi.wikipedia.org/wiki/Laivanupotus
 shipsetFin     = mkShipset [1, 2, 3, 3, 4, 5]

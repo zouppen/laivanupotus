@@ -4,10 +4,10 @@ module Main where
 import Data.Set (Set,fromList)
 import Data.List
 import Test.HUnit
-import Boat
 import Types
 import RuleBook
-import Boat.Internal
+import Engine.Base
+import Engine.Internal
 
 -- Helper functions not used outside tests
 

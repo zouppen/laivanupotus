@@ -1,5 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
-module Boat where
+module Engine.Base where
 
 import Data.Monoid (getFirst)
 import Data.List (sort)
@@ -7,7 +7,7 @@ import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
 
 import Types
-import Boat.Internal
+import Engine.Internal
 
 -- |Render a boat from boat definition
 renderBoat :: Boat -> Target
@@ -66,3 +66,7 @@ checkRules Rules{..} boats = getFirst $
         checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
         check _ True  = mempty
         check a False = pure a
+
+-- some helpers
+unwrapT (Target a) = a
+unwrapC (Clearance a) = a

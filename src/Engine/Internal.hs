@@ -1,4 +1,4 @@
-module Boat.Internal where
+module Engine.Internal where
 
 import Data.Set (Set)
 import Data.List (sort)
@@ -16,10 +16,6 @@ newtype Shipset = Shipset [Int] deriving (Show, Eq, Ord)
 
 -- |Keepout zone
 newtype KeepoutZone = KeepoutZone [(Int,Int)] deriving (Show)
-
--- some helpers
-unwrapT (Target a) = a
-unwrapC (Clearance a) = a
 
 -- |Create own shipset by defining ship counts
 mkShipset :: [Int] -> Shipset

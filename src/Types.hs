@@ -1,6 +1,6 @@
 module Types where
 
-import Boat.Internal (Target, Shipset, KeepoutZone)
+import Engine.Internal (Target, Shipset, KeepoutZone)
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
