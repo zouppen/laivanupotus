@@ -5,24 +5,52 @@ import Data.List
 import Test.HUnit
 import Boat
 
--- Boat creation tests
+-- Maritime mania -- Test boats for everybody --
+
+boat5v = Boat { boatX = 9
+              , boatY = 5
+              , boatLength = 5
+              , boatOrientation = Vertical
+              }
+
+boat4h = Boat { boatX = 5
+              , boatY = 3
+              , boatLength = 4
+              , boatOrientation = Horizontal
+              }
+
+-- Boat too close to boat4h
+boat3v = Boat { boatX = 4
+              , boatY = 1
+              , boatLength = 3
+              , boatOrientation = Vertical
+              }
+
+boat3w = Boat { boatX = 4
+              , boatY = 4
+              , boatLength = 3
+              , boatOrientation = Vertical
+              }
+
+boat3h = Boat { boatX = 1
+              , boatY = 9
+              , boatLength = 3
+              , boatOrientation = Horizontal
+              }
+
+boat2h = Boat { boatX = 1
+              , boatY = 4
+              , boatLength = 2
+              , boatOrientation = Horizontal
+              }
+
 boat1 = Boat { boatX = 0
              , boatY = 0
              , boatLength = 1
              , boatOrientation = Horizontal
              }
 
-boat4h = Boat { boatX = 5
-             , boatY = 3
-             , boatLength = 4
-             , boatOrientation = Horizontal
-             }
-
-boat3v = Boat { boatX = 4
-              , boatY = 1
-              , boatLength = 3
-              , boatOrientation = Vertical
-              }
+-- Boat creation tests
 
 boatPairs = [(boat1, [(0,0)])
             ,(boat4h, [(5,3), (6,3), (7,3), (8,3)])
