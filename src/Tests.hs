@@ -104,7 +104,7 @@ strikes = [ (boat1, [ ((0,0), Sink)
 testStrikes = TestList $ map testStrike strikes
 
 testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat boat) shots
-  where hitter remBoat (xy,expect) = toTuple expect $ strike (Coordinate xy) remBoat
+  where hitter remBoat (xy,expect) = toTuple expect $ strikeTarget (Coordinate xy) remBoat
         toTuple expect StrikeResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
 
 -- Clearance area test, single boat

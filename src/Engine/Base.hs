@@ -15,8 +15,8 @@ renderBoat Boat{..} = Target $ fromList $ case boatOrientation of
   Vertical   -> [ Coordinate (boatX , y) | y <- take boatLength [boatY..]]
 
 -- |Try to hit the boat
-strike :: Coordinate -> Target -> StrikeResult
-strike x (Target before) = StrikeResult outcome $ Target after
+strikeTarget :: Coordinate -> Target -> StrikeResult
+strikeTarget x (Target before) = StrikeResult outcome $ Target after
   where after = S.delete x before
         outcome = if S.member x before
                   then if S.null after
@@ -52,7 +52,6 @@ checkClearance :: KeepoutZone -> [Target] -> Bool
 checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSet
   where targetSet = S.unions $ map unwrapT targets
         clearanceSet = S.unions $ map (unwrapC . clearance keepout) targets
-
 
 -- some helpers
 unwrapT (Target a) = a
