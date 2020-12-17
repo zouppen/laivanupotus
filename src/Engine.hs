@@ -1,21 +1,23 @@
 {-# LANGUAGE RecordWildCards #-}
-module Engine ( checkRules
+module Engine ( createGame
               ) where
 
 import Data.Monoid (getFirst)
+import Data.Map.Strict (empty)
 
 import Engine.Base
 import Types
 
 -- |Check multitude of errors. Returns Nothing if all is fine. Using
 -- First monoid (stops and collect only first error).
-checkRules :: Rules -> [Boat] -> Maybe LayoutFailure
-checkRules Rules{..} boats = getFirst $
-  mconcat (map checkBoundaryMsg targets) <>
-  check Overlapping (checkOverlap targets) <>
-  check TooClose (checkClearance keepout targets) <>
-  check CountMismatch (checkShipCount shipset boats)
+createGame :: Rules -> [Boat] -> Either LayoutFailure Game
+createGame Rules{..} boats = maybe (Right game) Left (getFirst validate)
   where targets = map renderBoat boats
-        checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
         check _ True  = mempty
         check a False = pure a
+        checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
+        validate = mconcat (map checkBoundaryMsg targets) <>
+                   check Overlapping (checkOverlap targets) <>
+                   check TooClose (checkClearance keepout targets) <>
+                   check CountMismatch (checkShipCount shipset boats)
+        game = Game board targets empty

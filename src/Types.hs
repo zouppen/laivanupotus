@@ -1,6 +1,8 @@
 module Types where
 
-import Engine.Internal (Target, Shipset, KeepoutZone)
+import Data.Map.Strict (Map)
+
+import Engine.Internal (Target, Shipset, KeepoutZone, Coordinate)
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
@@ -29,3 +31,9 @@ data Rules = Rules { board   :: Board       -- ^Game are boundaries
                    , shipset :: Shipset     -- ^Number of ships and their sizes
                    , keepout :: KeepoutZone -- ^Keepout zone, if it's adjacent or also diagonal
                    } deriving (Show)
+
+-- |Game state. Contains enough information to render game state on screen
+data Game = Game { gBoard   :: Board                  -- ^Board settings
+                 , targets  :: [Target]               -- ^Target list
+                 , history  :: Map Coordinate Outcome -- ^Map of strikes
+                 } deriving (Show, Eq)
