@@ -34,8 +34,11 @@ clearance (KeepoutZone keepout) (Target s) = Clearance $ S.unions [nudge n s | n
 
 -- |Check that target fits on board
 checkBoundary :: Board -> Target -> Bool
-checkBoundary Board{..} (Target s) = S.foldr' (\x acc -> acc && bounds x) True s
-  where bounds (Coordinate (x,y)) = x >= minX && x <= maxX && y >= minY && y <= maxY
+checkBoundary board (Target s) = S.foldr' (\x acc -> acc && checkCoordBounds board x) True s
+
+-- |Check if a single coordinate is on board
+checkCoordBounds :: Board -> Coordinate -> Bool
+checkCoordBounds Board{..} (Coordinate (x,y)) = x >= minX && x <= maxX && y >= minY && y <= maxY
 
 -- |Check if the ship count matches game specs
 checkShipCount :: Shipset -> [Boat] -> Bool
