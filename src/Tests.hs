@@ -130,11 +130,22 @@ testBounds = TestList $ map toCase bounds
           (assertEqual $ "Boundaries of " ++ show boat ++ " and "  ++ show board)
           expected
           (checkBoundary board $ renderBoat boat)
-       
+
+-- Ship count test
+
+testShipCount = TestList
+  [ True ~=? checkShipCount shipsetFin [boat5v, boat4h, boat3v, boat3w, boat1, boat2h]
+  , False ~=? checkShipCount shipsetFin [boat5v, boat4h, boat3v, boat3w, boat2h]
+  , False ~=? checkShipCount shipsetFin [boat5v, boat4h, boat3v, boat3w, boat3h, boat2h]
+  ]
+
+-- Group all tests
+
 tests = TestList [ testBoatCreation
                  , testStrikes
                  , testClearances
                  , testBounds
+                 , testShipCount
                  ]
 
 main = runTestTT tests

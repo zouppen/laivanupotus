@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Boat where
 
+import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
 
@@ -33,6 +34,11 @@ newtype Clearance = Clearance (Set Coordinate) deriving (Show, Eq)
 -- |Coordinate is (x,y)
 newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
 
+newtype Shipset = Shipset [Int] deriving (Show, Eq, Ord)
+
+shipsetFin     = Shipset [1, 2, 3, 3, 4, 5] -- Finnish style https://fi.wikipedia.org/wiki/Laivanupotus
+shipsetBradley = Shipset [2, 3, 3, 4, 5]    -- Bradley rules https://en.wikipedia.org/wiki/Battleship_(game)
+
 -- |Create free-form boat or clearance, used in unit tests.
 freeform :: [(Int,Int)] -> Set Coordinate
 freeform xs = fromList $ map Coordinate xs
@@ -61,6 +67,10 @@ nudge (x0,y0) = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
 clearance :: Target -> Clearance
 clearance (Target s) = Clearance $ S.unions [nudge n s | n <- [(0,1), (0,-1), (1,0), (-1,0)]] \\ s
 
+-- |Check that target fits on board
 checkBoundary :: Board -> Target -> Bool
 checkBoundary Board{..} (Target s) = S.foldr' (\x acc -> acc && bounds x) True s
   where bounds (Coordinate (x,y)) = x >= minX && x <= maxX && y >= minY && y <= maxY
+
+checkShipCount :: Shipset -> [Boat] -> Bool
+checkShipCount (Shipset ss) boats = ss == (sort $ map boatLength boats)
