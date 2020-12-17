@@ -1,9 +1,19 @@
 {-# LANGUAGE RecordWildCards #-}
 module Main where
 
+import Data.Set (Set,fromList)
 import Data.List
 import Test.HUnit
 import Boat
+import Types
+import RuleBook
+import Boat.Internal
+
+-- Helper functions not used outside tests
+
+-- |Create free-form boat or clearance
+freeform :: [(Int,Int)] -> Set Coordinate
+freeform xs = fromList $ map Coordinate xs
 
 -- Maritime mania -- Test boats for everybody --
 
