@@ -56,8 +56,8 @@ checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSe
 
 -- |Check multitude of errors. Returns Nothing if all is fine. Using
 -- First monoid (stops and collect only first error).
-checkRules :: Board -> Shipset -> KeepoutZone -> [Boat] -> Maybe LayoutFailure
-checkRules board shipset keepout boats = getFirst $
+checkRules :: Rules -> [Boat] -> Maybe LayoutFailure
+checkRules Rules{..} boats = getFirst $
   mconcat (map checkBoundaryMsg targets) <>
   check Overlapping (checkOverlap targets) <>
   check TooClose (checkClearance keepout targets) <>

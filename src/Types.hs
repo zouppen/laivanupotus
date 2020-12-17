@@ -1,6 +1,6 @@
 module Types where
 
-import Boat.Internal (Target)
+import Boat.Internal (Target, Shipset, KeepoutZone)
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
@@ -24,3 +24,8 @@ data Board = Board { minX :: Int
 
 data LayoutFailure = OutOfBounds | Overlapping | TooClose | CountMismatch deriving (Show, Eq)
 
+-- |Rules of the game. See Rulebook.hs for some quite common setups
+data Rules = Rules { board   :: Board       -- ^Game are boundaries
+                   , shipset :: Shipset     -- ^Number of ships and their sizes
+                   , keepout :: KeepoutZone -- ^Keepout zone, if it's adjacent or also diagonal
+                   } deriving (Show)

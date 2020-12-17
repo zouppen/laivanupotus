@@ -188,7 +188,7 @@ testClearancesFull = TestList
 
 -- Whole board test
 
-testAll = checkRules teleBoard shipsetFin adjacentKeepout
+testAll = checkRules $ Rules teleBoard shipsetFin adjacentKeepout
 
 testAllRules = TestList
   [ Nothing ~=? testAll [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] -- Totally valid game

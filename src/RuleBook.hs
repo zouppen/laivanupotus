@@ -30,3 +30,7 @@ adjacentKeepout = KeepoutZone [(0,1), (0,-1), (1,0), (-1,0)]
 
 -- |Full keepout. The boats must not touch even diagonally.
 fullKeepout = KeepoutZone [(0,1), (0,-1), (1,0), (-1,0), (-1,-1), (-1,1), (1,1), (1,-1)]
+
+-- |Our favourite game ruleset
+teleGameDef :: Rules
+teleGameDef = Rules teleBoard shipsetFin adjacentKeepout
