@@ -5,6 +5,7 @@ module Types ( Board(..)
              , LayoutFailure(..)
              , Outcome(..)
              , Rules(..)
+             , StrikeFail(..)
              -- Re-exports
              , Coordinate
              , KeepoutZone
@@ -19,6 +20,8 @@ import Engine.Internal (Target, Shipset, KeepoutZone, Coordinate)
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
 data Outcome = Miss | Hit | Sink deriving (Show, Eq)
+
+data StrikeFail = InvalidCoordinate | AlreadyHit deriving (Show, Eq)
 
 data Boat = Boat { boatX           :: Int
                  , boatY           :: Int

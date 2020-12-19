@@ -1,14 +1,18 @@
 {-# LANGUAGE RecordWildCards #-}
 module Engine ( createGame
+              , strike
               ) where
 
 import Control.Monad.Except
-import Data.Map.Strict (empty)
+import Control.Monad.State.Lazy
+import Data.Map.Strict (empty, insert, notMember)
 
 import Engine.Base
 import Types
 
 type LayoutMonad = Except LayoutFailure
+type GameMonad e = ExceptT e (State Game)
+type StrikeMonad = GameMonad StrikeFail
 
 -- |Creates a new game while checking layout rules. Returns a Game
 -- normally but if boat layout is incorrect, an exception is thrown
@@ -21,6 +25,25 @@ createGame Rules{..} boats = do
   check CountMismatch $ checkShipCount shipset boats
   pure $ Game board targets empty
   where targets = map renderBoat boats
+
+-- |Strikes given coordinate
+strike :: Coordinate -> StrikeMonad Outcome
+strike coord = do
+  Game{..} <- get
+  check InvalidCoordinate $ checkCoordBounds gBoard coord
+  check AlreadyHit $ coord `notMember` history
+  -- Trying to hit one by one, initial state is not hit (Miss) of course.
+  let (targetsAfter, outcome) = runState (mapM (strikeM coord) targets) Miss
+      newHistory              = insert coord outcome history
+  put $ Game gBoard targetsAfter history
+  pure outcome
+
+-- |Stateful strike, collects hit/sink if any.
+strikeM :: Coordinate -> Target -> State Outcome Target
+strikeM coord target = do
+  let StrikeTargetResult{..} = strikeTarget coord target
+  when (outcome /= Miss) $ put outcome
+  pure boatAfter
 
 -- |Helper function for validation.
 check :: MonadError e f => e -> Bool -> f ()
