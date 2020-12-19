@@ -2,25 +2,27 @@
 module Engine ( createGame
               ) where
 
-import Data.Monoid (First, getFirst)
+import Control.Monad.Except
 import Data.Map.Strict (empty)
 
 import Engine.Base
 import Types
 
--- |Check multitude of errors. Returns Nothing if all is fine. Using
--- First monoid (stops and collect only first error).
-createGame :: Rules -> [Boat] -> Either LayoutFailure Game
-createGame Rules{..} boats = maybe (Right game) Left (getFirst validate)
-  where targets = map renderBoat boats
-        checkBoundaryMsg target = check OutOfBounds $ checkBoundary board target
-        validate = mconcat (map checkBoundaryMsg targets) <>
-                   check Overlapping (checkOverlap targets) <>
-                   check TooClose (checkClearance keepout targets) <>
-                   check CountMismatch (checkShipCount shipset boats)
-        game = Game board targets empty
+type LayoutMonad = Except LayoutFailure
 
--- |Helper function for First monoid
-check :: a -> Bool -> First a
-check _ True  = mempty
-check a False = pure a
+-- |Creates a new game while checking layout rules. Returns a Game
+-- normally but if boat layout is incorrect, an exception is thrown
+-- about the most severe error. There might be other errors, too.
+createGame :: Rules -> [Boat] -> LayoutMonad Game
+createGame Rules{..} boats = do
+  mapM (check OutOfBounds . checkBoundary board) targets
+  check Overlapping $ checkOverlap targets
+  check TooClose $ checkClearance keepout targets
+  check CountMismatch $ checkShipCount shipset boats
+  pure $ Game board targets empty
+  where targets = map renderBoat boats
+
+-- |Helper function for validation.
+check :: MonadError e f => e -> Bool -> f ()
+check _ True  = pure ()
+check e False = throwError e

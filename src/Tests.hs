@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Main where
 
+import Control.Monad.Except (runExcept)
 import Data.Set (Set,fromList)
 import Data.List
 import Test.HUnit
@@ -191,7 +192,7 @@ testClearancesFull = TestList
 
 -- Whole board test
 
-testAll = createGame $ Rules teleBoard shipsetFin adjacentKeepout
+testAll = runExcept . createGame (Rules teleBoard shipsetFin adjacentKeepout)
 
 testAllRules = TestList
   [ True ~=? isRight (testAll [boat5v, boat4h, boat3w, boat3h, boat2h, boat1]) -- Totally valid game
