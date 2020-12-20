@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 module Engine ( createGame
+              , shipsLeft
               , strike
               , StrikeMonad
               ) where
@@ -45,6 +46,11 @@ strikeOne coord target = do
   let StrikeTargetResult{..} = strikeTarget coord target
   when (outcome /= Miss) $ put outcome
   pure boatAfter
+
+shipsLeft :: Monad m => StrikeMonad m Int
+shipsLeft = do
+  Game{..} <- get
+  pure $ length $ filter isAfloat targets
 
 -- |Helper function for validation.
 check :: MonadError e f => e -> Bool -> f ()

@@ -60,6 +60,10 @@ checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSe
   where targetSet = S.unions $ map unwrapT targets
         clearanceSet = S.unions $ map (unwrapC . clearance keepout) targets
 
+-- |False if the ship is sunk, true otherwise (may have hits, though)
+isAfloat :: Target -> Bool
+isAfloat (Target a) = not $ null a
+
 -- some helpers
 unwrapT (Target a) = a
 unwrapC (Clearance a) = a

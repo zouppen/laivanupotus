@@ -238,17 +238,23 @@ testGame1 = writerToTest $ do
     Left e -> storeTest $ assertFailure $ "Unable to create testGame boats: " ++ show e
     Right game -> do
       flip runStateT game . runExceptT $ do
+        catchAndReport (Right 6 ~=?) shipsLeft
         strikeTest (Right Miss ~=?) (3,2) -- Normal miss condition
         strikeTest (Right Sink ~=?) (0,0) -- Single-block ship
+        catchAndReport (Right 5 ~=?) shipsLeft
         strikeTest (Left InvalidCoordinate ~=?) (10,10)
         strikeTest (Left AlreadyHit ~=?) (0,0) -- Already sunken ship
+        catchAndReport (Right 5 ~=?) shipsLeft
         strikeTest (Left AlreadyHit ~=?) (3,2) -- Coordinate already missed
         strikeTest (Left InvalidCoordinate ~=?) (10,10) -- Retrying same invalid coordinate again
         -- Sinking longer ship
         strikeTest (Right Hit ~=?) (1,9)
         strikeTest (Right Hit ~=?) (0,9)
+        catchAndReport (Right 5 ~=?) shipsLeft
         strikeTest (Right Sink ~=?) (2,9)
+        catchAndReport (Right 4 ~=?) shipsLeft
         strikeTest (Left AlreadyHit ~=?) (0,9) -- And then rehit it
+        catchAndReport (Right 4 ~=?) shipsLeft
         -- Hitting outside of each direction
         strikeTest (Left InvalidCoordinate ~=?) (5,-1) -- Up
         strikeTest (Left InvalidCoordinate ~=?) (3,10) -- Right
