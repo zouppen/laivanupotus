@@ -28,20 +28,20 @@ createGame Rules{..} boats = do
   where targets = map renderBoat boats
 
 -- |Strikes given coordinate
-strike :: (Monad m) => Coordinate -> StrikeMonad m Outcome
+strike :: Monad m => Coordinate -> StrikeMonad m Outcome
 strike coord = do
   Game{..} <- get
   check InvalidCoordinate $ checkCoordBounds gBoard coord
   check AlreadyHit $ coord `notMember` history
   -- Trying to hit one by one, initial state is not hit (Miss) of course.
-  let (targetsAfter, outcome) = runState (mapM (strikeM coord) targets) Miss
+  let (targetsAfter, outcome) = runState (mapM (strikeOne coord) targets) Miss
       newHistory              = insert coord outcome history
   put $ Game gBoard targetsAfter newHistory
   pure outcome
 
 -- |Stateful strike, collects hit/sink if any.
-strikeM :: Coordinate -> Target -> State Outcome Target
-strikeM coord target = do
+strikeOne :: Coordinate -> Target -> State Outcome Target
+strikeOne coord target = do
   let StrikeTargetResult{..} = strikeTarget coord target
   when (outcome /= Miss) $ put outcome
   pure boatAfter
