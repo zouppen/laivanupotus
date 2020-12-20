@@ -261,6 +261,27 @@ testGame1 = writerToTest $ do
         strikeTest (Left InvalidCoordinate ~=?) (10,7) -- Down
         strikeTest (Left InvalidCoordinate ~=?) (-1,2) -- Left
         strikeTest (Left InvalidCoordinate ~=?) (13,2) -- Way off
+        -- Blast off the rest of the ships
+        strikeTest (Right Hit ~=?) (2,4)
+        strikeTest (Right Hit ~=?) (4,4)
+        strikeTest (Right Hit ~=?) (4,5)
+        strikeTest (Right Hit ~=?) (5,3)
+        strikeTest (Right Miss ~=?) (5,5)
+        strikeTest (Right Hit ~=?) (7,3)
+        strikeTest (Right Hit ~=?) (8,3)
+        strikeTest (Right Hit ~=?) (9,9)
+        strikeTest (Right Hit ~=?) (9,8)
+        strikeTest (Right Hit ~=?) (9,7)
+        strikeTest (Right Hit ~=?) (9,6)
+        catchAndReport (Right 4 ~=?) shipsLeft
+        -- And now drop all of them
+        strikeTest (Right Sink ~=?) (9,5)
+        catchAndReport (Right 3 ~=?) shipsLeft
+        strikeTest (Right Sink ~=?) (1,4)
+        catchAndReport (Right 2 ~=?) shipsLeft
+        strikeTest (Right Sink ~=?) (4,6)
+        strikeTest (Right Sink ~=?) (6,3)
+        catchAndReport (Right 0 ~=?) shipsLeft
       pure () -- Throw final state away
 
 -- Group all tests
