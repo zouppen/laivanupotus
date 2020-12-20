@@ -36,7 +36,7 @@ strike coord = do
   -- Trying to hit one by one, initial state is not hit (Miss) of course.
   let (targetsAfter, outcome) = runState (mapM (strikeM coord) targets) Miss
       newHistory              = insert coord outcome history
-  put $ Game gBoard targetsAfter history
+  put $ Game gBoard targetsAfter newHistory
   pure outcome
 
 -- |Stateful strike, collects hit/sink if any.
