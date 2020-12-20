@@ -7,10 +7,13 @@ import Data.IORef
 import Data.Map.Strict ((!?))
 import Text.Printf
 import System.IO.Unsafe (unsafePerformIO)
+import System.Random (newStdGen, StdGen)
+import Control.Monad.State.Lazy (runState)
 
 import Engine
 import Types
-import TestMaterial
+import NewGame (newGame)
+import RuleBook
 
 renderToText :: Bool -> Game -> String
 renderToText showBoats game = "  " <> mconcat [ printf "%3d" x | x <- xs] <> "\n" <>
@@ -35,26 +38,30 @@ renderToText showBoats game = "  " <> mconcat [ printf "%3d" x | x <- xs] <> "\n
 
 -- And now comes the global state hack
 
-myGame :: IORef Game
-{-# NOINLINE myGame #-}
-myGame = unsafePerformIO $ newGame >>= newIORef 
- where newGame = case runExcept game1 of
-         Left e -> fail $ "Error creating game: " ++ show e
-         Right x -> pure x
+global :: IORef (Game, StdGen)
+{-# NOINLINE global #-}
+global = unsafePerformIO $ do
+  gen <- newStdGen
+  newIORef $ runState (newGame teleGameDef) gen
 
 s :: Int -> Int -> IO ()
 s x y = do
-  old <- readIORef myGame
+  (old,gen) <- readIORef global
   new <- case run old $ strike $ Coordinate (x,y) of
     (Left e, _) -> fail $ show e
     (Right a, new) -> print a >> pure new
-  writeIORef myGame new
+  writeIORef global (new, gen)
 
 p = printGame False
 c = printGame True
 
+n = do
+  (_,gen) <- readIORef global
+  writeIORef global $ runState (newGame teleGameDef) gen
+  putStrLn "Started new game"
+
 printGame cheat = do
-  game <- readIORef myGame
+  (game,_) <- readIORef global
   putStr $ renderToText cheat game
 
 h = do
