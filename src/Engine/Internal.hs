@@ -1,6 +1,6 @@
 module Engine.Internal where
 
-import Data.Set (Set)
+import Data.Set (Set, unions, member)
 import Data.List (sort)
 
 -- |Target is a rendered ship, set of coordinates
@@ -24,3 +24,7 @@ mkShipset ss = Shipset $ sort ss
 -- some helpers
 unwrapT (Target a) = a
 unwrapC (Clearance a) = a
+
+-- |Used in rendering.
+shipLookup :: [Target] -> Coordinate -> Bool
+shipLookup ts = flip member (unions $ map unwrapT ts)

@@ -11,6 +11,7 @@ module Types ( Board(..)
              , KeepoutZone
              , Shipset
              , Target
+             , shipLookup
              ) where
 
 import Data.Map.Strict (Map)

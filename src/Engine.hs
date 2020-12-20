@@ -3,11 +3,14 @@ module Engine ( createGame
               , shipsLeft
               , strike
               , StrikeMonad
+              , LayoutMonad
+              , run
               ) where
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Data.Map.Strict (empty, insert, notMember)
+import Data.Functor.Identity (Identity)
 
 import Engine.Base
 import Types
@@ -56,3 +59,8 @@ shipsLeft = do
 check :: MonadError e f => e -> Bool -> f ()
 check _ True  = pure ()
 check e False = throwError e
+
+-- |Run the game monad and return possible error on the Left and new
+-- state in a tuple.
+run :: Game -> GameMonad e Identity a -> (Either e a, Game)
+run game = flip runState game . runExceptT
