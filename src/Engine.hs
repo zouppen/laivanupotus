@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Engine ( createGame
               , strike
+              , StrikeMonad
               ) where
 
 import Control.Monad.Except
@@ -11,8 +12,8 @@ import Engine.Base
 import Types
 
 type LayoutMonad = Except LayoutFailure
-type GameMonad e = ExceptT e (State Game)
-type StrikeMonad = GameMonad StrikeFail
+type GameMonad e o = ExceptT e (StateT Game o)
+type StrikeMonad o = GameMonad StrikeFail o
 
 -- |Creates a new game while checking layout rules. Returns a Game
 -- normally but if boat layout is incorrect, an exception is thrown
@@ -27,7 +28,7 @@ createGame Rules{..} boats = do
   where targets = map renderBoat boats
 
 -- |Strikes given coordinate
-strike :: Coordinate -> StrikeMonad Outcome
+strike :: (Monad m) => Coordinate -> StrikeMonad m Outcome
 strike coord = do
   Game{..} <- get
   check InvalidCoordinate $ checkCoordBounds gBoard coord

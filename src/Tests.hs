@@ -1,7 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 module Main where
 
-import Control.Monad.Except (runExcept)
+import Control.Monad.State.Lazy
+import Control.Monad.Trans.Writer.Lazy
+import Control.Monad.Except (ExceptT, runExcept, runExceptT)
 import Data.Set (Set,fromList)
 import Data.List
 import Test.HUnit
@@ -202,6 +204,35 @@ testAllRules = TestList
   , Left TooClose ~=? testAll [boat5v, boat4h, boat3v, boat3h, boat2h, boat1] -- Too close of another ship
   ]
 
+-- Gameplay
+
+type TestWriter = Writer [Test]
+
+storeTest :: Assertion -> TestWriter ()
+storeTest a = tell [TestCase a]
+
+-- W T F. Never give monads to this guy.
+strikeTest :: (Outcome -> Test)
+           -> (Int, Int)
+           -> StrikeMonad TestWriter ()
+strikeTest testify arg = strike (Coordinate arg) >>= \x -> lift $ lift $ tell [testify x]
+
+writerToTest :: TestWriter a -> Test
+writerToTest = TestList . execWriter
+
+testGame1 :: Test
+testGame1 = writerToTest $ do
+  case runExcept $ createGame (Rules teleBoard shipsetFin adjacentKeepout) [boat5v, boat4h, boat3w, boat3h, boat2h, boat1] of
+    Left e -> storeTest $ assertFailure $ "Unable to create testGame boats: " ++ show e
+    Right game -> do
+      flip runStateT game . runExceptT $ do
+        strikeTest (Miss ~=?) (3,2)
+        strikeTest (Sink ~=?) (0,0)
+        --strikeTest (Miss ~=?) (10,10)
+      pure ()
+  return ()
+
+
 -- Group all tests
 
 tests = TestList [ testBoatCreation
@@ -212,6 +243,7 @@ tests = TestList [ testBoatCreation
                  , overlapTestSubjects
                  , testClearancesFull
                  , testAllRules
+                 , testGame1
                  ]
 
 main = runTestTT tests
