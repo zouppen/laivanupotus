@@ -20,3 +20,7 @@ newtype KeepoutZone = KeepoutZone [(Int,Int)] deriving (Show)
 -- |Create own shipset by defining ship counts
 mkShipset :: [Int] -> Shipset
 mkShipset ss = Shipset $ sort ss
+
+-- some helpers
+unwrapT (Target a) = a
+unwrapC (Clearance a) = a

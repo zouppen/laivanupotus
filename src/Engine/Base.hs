@@ -63,7 +63,3 @@ checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSe
 -- |False if the ship is sunk, true otherwise (may have hits, though)
 isAfloat :: Target -> Bool
 isAfloat (Target a) = not $ null a
-
--- some helpers
-unwrapT (Target a) = a
-unwrapC (Clearance a) = a
