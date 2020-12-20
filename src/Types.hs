@@ -7,7 +7,7 @@ module Types ( Board(..)
              , Rules(..)
              , StrikeFail(..)
              -- Re-exports
-             , Coordinate
+             , Coordinate(..)
              , KeepoutZone
              , Shipset
              , Target
@@ -15,7 +15,7 @@ module Types ( Board(..)
 
 import Data.Map.Strict (Map)
 
-import Engine.Internal (Target, Shipset, KeepoutZone, Coordinate)
+import Engine.Internal
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
