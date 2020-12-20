@@ -3,7 +3,7 @@ module Main where
 
 import Control.Monad.State.Lazy
 import Control.Monad.Trans.Writer.Lazy
-import Control.Monad.Except (ExceptT, runExcept, runExceptT)
+import Control.Monad.Except (MonadError, ExceptT, runExcept, runExceptT, catchError)
 import Data.Set (Set,fromList)
 import Data.List
 import Test.HUnit
@@ -48,7 +48,7 @@ boat3w = Boat { boatX = 4
               , boatOrientation = Vertical
               }
 
-boat3h = Boat { boatX = 1
+boat3h = Boat { boatX = 0
               , boatY = 9
               , boatLength = 3
               , boatOrientation = Horizontal
@@ -212,10 +212,16 @@ storeTest :: Assertion -> TestWriter ()
 storeTest a = tell [TestCase a]
 
 -- W T F. Never give monads to this guy.
-strikeTest :: (Outcome -> Test)
+strikeTest :: (Either StrikeFail Outcome -> Test)
            -> (Int, Int)
            -> StrikeMonad TestWriter ()
-strikeTest testify arg = strike (Coordinate arg) >>= \x -> lift $ lift $ tell [testify x]
+strikeTest testify arg = eitherify (strike (Coordinate arg)) >>= fill
+  where fill x = lift $ lift $ tell [testify x]
+
+-- |Run given action and catch error to Either type. For some reason
+-- MonadErorr misses `try`.
+eitherify :: MonadError e m => m a -> m (Either e a)
+eitherify act = (Right <$> act) `catchError` (pure . Left)
 
 writerToTest :: TestWriter a -> Test
 writerToTest = TestList . execWriter
@@ -226,12 +232,24 @@ testGame1 = writerToTest $ do
     Left e -> storeTest $ assertFailure $ "Unable to create testGame boats: " ++ show e
     Right game -> do
       flip runStateT game . runExceptT $ do
-        strikeTest (Miss ~=?) (3,2)
-        strikeTest (Sink ~=?) (0,0)
-        --strikeTest (Miss ~=?) (10,10)
-      pure ()
-  return ()
-
+        strikeTest (Right Miss ~=?) (3,2) -- Normal miss condition
+        strikeTest (Right Sink ~=?) (0,0) -- Single-block ship
+        strikeTest (Left InvalidCoordinate ~=?) (10,10)
+        strikeTest (Left AlreadyHit ~=?) (0,0) -- Already sunken ship
+        strikeTest (Left AlreadyHit ~=?) (3,2) -- Coordinate already missed
+        strikeTest (Left InvalidCoordinate ~=?) (10,10) -- Retrying same invalid coordinate again
+        -- Sinking longer ship
+        strikeTest (Right Hit ~=?) (1,9)
+        strikeTest (Right Hit ~=?) (0,9)
+        strikeTest (Right Sink ~=?) (2,9)
+        strikeTest (Left AlreadyHit ~=?) (0,9) -- And then rehit it
+        -- Hitting outside of each direction
+        strikeTest (Left InvalidCoordinate ~=?) (5,-1) -- Up
+        strikeTest (Left InvalidCoordinate ~=?) (3,10) -- Right
+        strikeTest (Left InvalidCoordinate ~=?) (10,7) -- Down
+        strikeTest (Left InvalidCoordinate ~=?) (-1,2) -- Left
+        strikeTest (Left InvalidCoordinate ~=?) (13,2) -- Way off
+      pure () -- Throw final state away
 
 -- Group all tests
 
