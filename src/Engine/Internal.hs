@@ -21,6 +21,10 @@ newtype KeepoutZone = KeepoutZone [(Int,Int)] deriving (Show)
 mkShipset :: [Int] -> Shipset
 mkShipset ss = Shipset $ sort ss
 
+-- |Dump ship lengths in descending order
+dumpShipsetDesc :: Shipset -> [Int]
+dumpShipsetDesc (Shipset ss) = reverse ss
+
 -- some helpers
 unwrapT (Target a) = a
 unwrapC (Clearance a) = a

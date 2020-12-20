@@ -12,6 +12,7 @@ module Types ( Board(..)
              , Shipset
              , Target
              , shipLookup
+             , dumpShipsetDesc
              ) where
 
 import Data.Map.Strict (Map)

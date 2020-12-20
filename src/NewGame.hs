@@ -31,3 +31,15 @@ fitShip rules boats boatLength = iterateUntil valid $ randomBoat (board rules) b
                        Left CountMismatch -> True  -- Do not stress about the count at this point.
                        Right _            -> True  -- Game generated, this is also fine.
                        _                  -> False -- Otherwise let's try again
+
+-- |Fits all ships to the playground according to the rules.
+fitShips :: RandomGen s => Rules -> State s [Boat]
+fitShips rules = foldM f [] $ dumpShipsetDesc $ shipset rules
+  where f boats len = (:boats) <$> fitShip rules boats len
+
+newGame :: RandomGen s => Rules -> State s Game
+newGame rules = do
+  boats <- fitShips rules
+  case runExcept $ createGame rules boats of
+    Left _     -> error "Game generation fails. Fatal"
+    Right game -> pure game
