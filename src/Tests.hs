@@ -212,14 +212,20 @@ storeTest :: Assertion -> TestWriter ()
 storeTest a = tell [TestCase a]
 
 -- W T F. Never give monads to this guy.
+catchAndReport
+  :: (MonadError e (t1 (t2 (WriterT [a1] m))), MonadTrans t1,
+      MonadTrans t2, Monad m, Monad (t2 (WriterT [a1] m))) =>
+     (Either e a2 -> a1)
+     -> t1 (t2 (WriterT [a1] m)) a2 -> t1 (t2 (WriterT [a1] m)) ()
+catchAndReport testify act = eitherify act >>= \x -> lift $ lift $ tell [testify x]
+
 strikeTest :: (Either StrikeFail Outcome -> Test)
            -> (Int, Int)
            -> StrikeMonad TestWriter ()
-strikeTest testify arg = eitherify (strike (Coordinate arg)) >>= fill
-  where fill x = lift $ lift $ tell [testify x]
+strikeTest testify = catchAndReport testify . strike . Coordinate
 
 -- |Run given action and catch error to Either type. For some reason
--- MonadErorr misses `try`.
+-- MonadErorr doesn't have `try`.
 eitherify :: MonadError e m => m a -> m (Either e a)
 eitherify act = (Right <$> act) `catchError` (pure . Left)
 
