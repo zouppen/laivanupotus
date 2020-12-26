@@ -16,7 +16,7 @@ import NewGame (newGame)
 import RuleBook
 
 renderToText :: Bool -> Game -> String
-renderToText showBoats game = "  " <> mconcat [ printf "%3d" x | x <- xs] <> "\n" <>
+renderToText showBoats game = "  " <> mconcat [ (' ':letterify x) | x <- xs] <> "\n" <>
                     separator "┌" "┬" "┐" <>
                     mconcat [ row y | y <- [minY..maxY]] <>
                     separator "└" "┴" "┘"
@@ -27,9 +27,10 @@ renderToText showBoats game = "  " <> mconcat [ printf "%3d" x | x <- xs] <> "\n
                 if y == maxY then "" else separator "├" "┼" "┤"
         status coord = render coord <> "│"
         separator start mid end = "  " <> start <> mconcat [ "──" <> sep | x <- xs, let sep = if x == maxX then end else mid ] <> "\n"
+        letterify x = [toEnum $ x + fromEnum 'Ａ']
         emoji x = case x of
-          Nothing -> "  "
-          Just Hit -> "🔥"
+          Nothing   -> "  "
+          Just Hit  -> "🔥"
           Just Miss -> "🌊"
           Just Sink -> "💀"
         render coord = if showBoats && shipLookup targets coord
