@@ -61,8 +61,7 @@ commandParser board = do
          cmd 'h' (pure helpText) <|>
          cmd 'n' worldNew <|>
          cmd 'p' (worldPrint False) <|>
-         cmd 'c' (worldPrint True) <|>
-         fail "Unknown command"
+         cmd 'c' (worldPrint True)
   space
   eof
   pure out
@@ -79,8 +78,8 @@ main = do
     lift $ putStr "> "
     line <- lift $ getLine
     (Game{..}, _) <- S.get
-    case parse (commandParser gBoard) "input" line of
-      Left e    -> lift $ print e
+    case parse (commandParser gBoard) "Parse error" line of
+      Left e    -> lift $ putStrLn $ errorBundlePretty e
       Right cmd -> do
         out <- cmd
         lift $ putStrLn out
