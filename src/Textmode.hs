@@ -48,10 +48,10 @@ type World m = S.StateT (Game, StdGen) m
 parseCoord :: Board -> Parser Coordinate
 parseCoord Board{..} = do
   xRaw <- letterChar
-  x <- maybe (fail "Invalid x coordinate") pure $ tryEnum 'A' minX maxX xRaw <|> tryEnum 'a' minX maxX xRaw
+  x <- maybe (fail "Invalid x coordinate") pure $ testEnum 'A' minX maxX xRaw <|> testEnum 'a' minX maxX xRaw
   space
   yRaw <- decimal
-  y <- maybe (fail "Invalid y coordinate") pure $ tryBounds minY maxY yRaw
+  y <- maybe (fail "Invalid y coordinate") pure $ testBounds minY maxY yRaw
   pure $ Coordinate (x,y)
 
 commandParser :: Monad m => Board -> Parser (World m String)
@@ -85,15 +85,15 @@ main = do
         out <- cmd
         lift $ putStrLn out
 
-tryEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
-tryEnum start min max c = tryBounds min max val
+testEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
+testEnum start min max c = testBounds min max val
   where diff = (fromEnum c) - (fromEnum start)
         val = diff + min
 
-tryBounds :: Int -> Int -> Int -> Maybe Int
-tryBounds min max x = if x > max || x < min
-                      then Nothing
-                      else Just x
+testBounds :: Int -> Int -> Int -> Maybe Int
+testBounds min max x = if x > max || x < min
+                       then Nothing
+                       else Just x
 
 worldStrike :: Monad m => Coordinate -> World m String
 worldStrike coord = do
