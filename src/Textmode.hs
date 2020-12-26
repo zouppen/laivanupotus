@@ -1,14 +1,18 @@
 {-# LANGUAGE RecordWildCards #-}
 -- |Text mode game, useful for showing the game states
-module Textmode where
+module Main where
 
 import Control.Monad.Except
 import Data.IORef
 import Data.Map.Strict ((!?))
 import Text.Printf
-import System.IO.Unsafe (unsafePerformIO)
 import System.Random (newStdGen, StdGen)
-import Control.Monad.State.Lazy (runState)
+import Text.Megaparsec
+import Text.Megaparsec.Char
+import Text.Megaparsec.Char.Lexer (decimal)
+import Data.Char (toUpper)
+import Data.Void (Void)
+import qualified Control.Monad.State.Lazy as S
 
 import Engine
 import Types
@@ -37,39 +41,84 @@ renderToText showBoats game = "  " <> mconcat [ (' ':letterify x) | x <- xs] <> 
                        then "🚢"
                        else emoji $ history !? coord
 
--- And now comes the global state hack
+type Parser = Parsec Void String
+type World m = S.StateT (Game, StdGen) m
 
-global :: IORef (Game, StdGen)
-{-# NOINLINE global #-}
-global = unsafePerformIO $ do
-  gen <- newStdGen
-  newIORef $ runState (newGame teleGameDef) gen
+-- |Parse coordinate in character-number format (such as "B5")
+parseCoord :: Board -> Parser Coordinate
+parseCoord Board{..} = do
+  xRaw <- letterChar
+  x <- maybe (fail "Invalid x coordinate") pure $ tryEnum 'A' minX maxX xRaw <|> tryEnum 'a' minX maxX xRaw
+  space
+  yRaw <- decimal
+  y <- maybe (fail "Invalid y coordinate") pure $ tryBounds minY maxY yRaw
+  pure $ Coordinate (x,y)
 
-s :: Int -> Int -> IO ()
-s x y = do
-  (old,gen) <- readIORef global
-  new <- case run old $ strike $ Coordinate (x,y) of
-    (Left e, _) -> fail $ show e
-    (Right a, new) -> print a >> pure new
-  writeIORef global (new, gen)
+commandParser :: Monad m => Board -> Parser (World m String)
+commandParser board = do
+  space
+  out <- worldStrike <$> try (parseCoord board) <|>
+         cmd 'h' (pure helpText) <|>
+         cmd 'n' worldNew <|>
+         cmd 'p' (worldPrint False) <|>
+         cmd 'c' (worldPrint True) <|>
+         fail "Unknown command"
+  space
+  eof
+  pure out
+  where cmd c v = try (simple c) >> pure v
+        simple :: Char -> Parser ()
+        simple c = void $ char c <|> char (toUpper c)
 
-p = printGame False
-c = printGame True
+main :: IO ()
+main = do
+  initialState <- do
+    gen <- newStdGen
+    pure $ S.runState (newGame teleGameDef) gen
+  void $ flip S.runStateT initialState $ forever $ do
+    lift $ putStr "> "
+    line <- lift $ getLine
+    (Game{..}, _) <- S.get
+    case parse (commandParser gBoard) "input" line of
+      Left e    -> lift $ print e
+      Right cmd -> do
+        out <- cmd
+        lift $ putStrLn out
 
-n = do
-  (_,gen) <- readIORef global
-  writeIORef global $ runState (newGame teleGameDef) gen
-  putStrLn "Started new game"
+tryEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
+tryEnum start min max c = tryBounds min max val
+  where diff = (fromEnum c) - (fromEnum start)
+        val = diff + min
 
-printGame cheat = do
-  (game,_) <- readIORef global
-  putStr $ renderToText cheat game
+tryBounds :: Int -> Int -> Int -> Maybe Int
+tryBounds min max x = if x > max || x < min
+                      then Nothing
+                      else Just x
 
-h = do
-  putStrLn $
-    "Tervetuloa laivanupotukseen!\n\n\
-    \h\tNäytä tämä ohje\n\
-    \n\tAloita uusi peli\n\
-    \s x y\tHyökkää annettuun koordinaattiin\n\
-    \p\tTulosta pelitilanne\n\
-    \c\tHuijaa!\n"
+worldStrike :: Monad m => Coordinate -> World m String
+worldStrike coord = do
+  (old,gen) <- S.get
+  case run old $ strike coord of
+    (Left e, _) -> pure $ show e
+    (Right a, new) -> do
+      S.put (new, gen)
+      pure $ show a
+
+worldNew :: Monad m => World m String
+worldNew = do
+  (_,gen) <- S.get
+  S.put $ S.runState (newGame teleGameDef) gen
+  return "Started new game"
+
+worldPrint :: Monad m => Bool -> World m String
+worldPrint cheat = do
+  (game,_) <- S.get
+  pure $ renderToText cheat game
+
+helpText =
+  "Tervetuloa laivanupotukseen!\n\n\
+  \h\tNäytä tämä ohje\n\
+  \n\tAloita uusi peli\n\
+  \xy\tHyökkää annettuun koordinaattiin (esim. A4)\n\
+  \p\tTulosta pelitilanne\n\
+  \c\tHuijaa!\n"
