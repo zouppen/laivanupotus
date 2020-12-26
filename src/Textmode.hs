@@ -47,12 +47,19 @@ type World m = S.StateT (Game, StdGen) m
 -- |Parse coordinate in character-number format (such as "B5")
 parseCoord :: Board -> Parser Coordinate
 parseCoord Board{..} = do
-  xRaw <- letterChar
-  x <- maybe (fail "Invalid x coordinate") pure $ testEnum 'A' minX maxX xRaw <|> testEnum 'a' minX maxX xRaw
+  x <- label "X coordinate" $ token (\x -> testEnum 'A' minX maxX x <|> testEnum 'a' minX maxX x) mempty
   space
-  yRaw <- decimal
-  y <- maybe (fail "Invalid y coordinate") pure $ testBounds minY maxY yRaw
+  y <- label "Y coordinate" $ validateAhead (testBounds minY maxY) decimal
   pure $ Coordinate (x,y)
+
+-- |Tests the condition while look-aheading. Otherwise works
+-- normally. Makes error messages more precise.
+validateAhead :: MonadParsec e s m => (b -> Bool) -> m b -> m b
+validateAhead f p = do
+  x <- lookAhead p
+  if f x
+    then p
+    else failure Nothing mempty
 
 commandParser :: Monad m => Board -> Parser (World m String)
 commandParser board = do
@@ -85,14 +92,14 @@ main = do
         lift $ putStrLn out
 
 testEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
-testEnum start min max c = testBounds min max val
+testEnum start min max c = if testBounds min max val
+                           then Just val
+                           else Nothing
   where diff = (fromEnum c) - (fromEnum start)
         val = diff + min
 
-testBounds :: Int -> Int -> Int -> Maybe Int
-testBounds min max x = if x > max || x < min
-                       then Nothing
-                       else Just x
+testBounds :: Int -> Int -> Int -> Bool
+testBounds min max x = not (x > max || x < min)
 
 worldStrike :: Monad m => Coordinate -> World m String
 worldStrike coord = do
