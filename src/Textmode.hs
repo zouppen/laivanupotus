@@ -22,28 +22,28 @@ import NewGame (newGame)
 import RuleBook
 
 renderToText :: Bool -> Game -> String
-renderToText showBoats game = "  " <> mconcat [ (' ':letterify x) | x <- xs] <> "\n" <>
+renderToText showBoats game = "   " <> mconcat [ (' ':letterify x) | x <- xs] <> "\n" <>
                     separator "┌" "┬" "┐" <>
                     mconcat [ row y | y <- [minY..maxY]] <>
                     separator "└" "┴" "┘"
   where Game{..}  = game
         Board{..} = gBoard
         xs = [minX..maxX]
-        row y = printf "%2d│" y <> mconcat [status $ Coordinate (x,y) | x <- xs] <> "\n" <>
+        row y = printf "%2d │" y <> mconcat [status $ Coordinate (x,y) | x <- xs] <> "\n" <>
                 if y == maxY then "" else separator "├" "┼" "┤"
         status coord = render coord <> "│"
-        separator start mid end = "  " <> start <> mconcat [ "──" <> sep | x <- xs, let sep = if x == maxX then end else mid ] <> "\n"
-        letterify x = [toEnum $ x + fromEnum 'Ａ']
+        separator start mid end = "   " <> start <> mconcat [ "───" <> sep | x <- xs, let sep = if x == maxX then end else mid ] <> "\n"
+        letterify x = [' ',toEnum $ x + fromEnum 'A', ' ']
         render coord = if showBoats && shipLookup targets coord
-                       then "🚢"
+                       then "båt"
                        else emoji $ history !? coord
 
 emoji :: Maybe Outcome -> [Char]
 emoji x = case x of
-            Nothing   -> "  "
-            Just Hit  -> "🔥"
-            Just Miss -> "🌊"
-            Just Sink -> "💀"
+            Nothing   -> "   "
+            Just Hit  -> " X "
+            Just Miss -> " ~ "
+            Just Sink -> "*X*"
 
 type Parser = Parsec Void String
 type World m = S.StateT (Game, StdGen) m
@@ -129,9 +129,9 @@ worldStrike coord = do
       S.put (new, gen)
       let msg = case a of
                   Hit -> "HIT!"
-                  Miss -> "miss"
+                  Miss -> "miss."
                   Sink -> "HIT! Target destroyed."
-      pure $ "Fire... " ++ msg ++ " " ++ emoji (Just a) ++ "\n"
+      pure $ "Fire... " ++ msg ++ "\n"
 
 worldNew :: Monad m => World m String
 worldNew = do
