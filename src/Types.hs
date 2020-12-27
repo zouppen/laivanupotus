@@ -27,7 +27,9 @@ data Outcome = Miss  -- ^Target missed
              | Close -- ^In clearance area. In normal game not exposed before sink.
              deriving (Show, Eq)
 
-data StrikeFail = InvalidCoordinate | AlreadyHit deriving (Show, Eq)
+data StrikeFail = InvalidCoordinate -- ^Coordinate is not valid.
+                | AlreadyHit        -- ^Target is already hit.
+                deriving (Show, Eq)
 
 data Boat = Boat { boatX           :: Int
                  , boatY           :: Int
