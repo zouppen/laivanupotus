@@ -24,6 +24,7 @@ data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 data Outcome = Miss  -- ^Target missed
              | Hit   -- ^Target hit, didn't make it sink.
              | Sink  -- ^Target hit and sink
+             | Close -- ^In clearance area. In normal game not exposed before sink.
              deriving (Show, Eq)
 
 data StrikeFail = InvalidCoordinate | AlreadyHit deriving (Show, Eq)

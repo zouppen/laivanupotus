@@ -4,12 +4,14 @@ module Engine.Base where
 import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
+import Data.Map.Strict (Map, fromSet, empty)
 
 import Types
 import Engine.Internal
 
 data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
                                              , boatAfter :: Target
+                                             , exposed   :: Map Coordinate Outcome
                                              } deriving (Show, Eq)
 
 -- |Render a boat from boat definition
@@ -31,6 +33,9 @@ strikeTarget x Target{..} = StrikeTargetResult{..}
                        then Sink
                        else Hit
                   else Miss
+        exposed = if outcome == Sink
+                  then fromSet (const Close) clearance
+                  else empty
         boatAfter = Target{coordinates=after,..}
 
 -- |Nudge coordinates by given constant
