@@ -4,10 +4,9 @@ import Data.Set (Set, unions, member)
 import Data.List (sort)
 
 -- |Target is a rendered ship, set of coordinates
-newtype Target = Target (Set Coordinate) deriving (Show, Eq)
-
--- |Clearance is a set of points surrounding targets
-newtype Clearance = Clearance (Set Coordinate) deriving (Show, Eq)
+data Target = Target { coordinates :: Set Coordinate
+                     , clearance   :: Set Coordinate
+                     } deriving (Show, Eq)
 
 -- |Coordinate is (x,y)
 newtype Coordinate = Coordinate (Int,Int) deriving (Show, Eq, Ord)
@@ -25,10 +24,6 @@ mkShipset ss = Shipset $ sort ss
 dumpShipsetDesc :: Shipset -> [Int]
 dumpShipsetDesc (Shipset ss) = reverse ss
 
--- some helpers
-unwrapT (Target a) = a
-unwrapC (Clearance a) = a
-
 -- |Used in rendering.
 shipLookup :: [Target] -> Coordinate -> Bool
-shipLookup ts = flip member (unions $ map unwrapT ts)
+shipLookup ts = flip member (unions $ map coordinates ts)

@@ -13,14 +13,18 @@ data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
                                              } deriving (Show, Eq)
 
 -- |Render a boat from boat definition
-renderBoat :: Boat -> Target
-renderBoat Boat{..} = Target $ fromList $ case boatOrientation of
+renderBoat :: KeepoutZone -> Boat -> Target
+renderBoat keepout Boat{..} = renderBoatRaw keepout $ fromList $ case boatOrientation of
   Horizontal -> [ Coordinate (x , boatY) | x <- take boatLength [boatX..]]
   Vertical   -> [ Coordinate (boatX , y) | y <- take boatLength [boatY..]]
 
+renderBoatRaw :: KeepoutZone -> Set Coordinate -> Target
+renderBoatRaw (KeepoutZone keepout) coordinates = Target{..}
+  where clearance = S.unions [nudge n coordinates | n <- keepout] \\ coordinates
+
 -- |Try to hit the boat
 strikeTarget :: Coordinate -> Target -> StrikeTargetResult
-strikeTarget x (Target before) = StrikeTargetResult outcome $ Target after
+strikeTarget x (Target before c) = StrikeTargetResult outcome $ Target after c
   where after = S.delete x before
         outcome = if S.member x before
                   then if S.null after
@@ -32,13 +36,9 @@ strikeTarget x (Target before) = StrikeTargetResult outcome $ Target after
 nudge :: (Int, Int) -> Set Coordinate -> Set Coordinate
 nudge (x0,y0) = S.mapMonotonic $ \(Coordinate (x,y)) -> Coordinate (x0+x, y0+y)
 
--- |Clearance coordinates around the ship
-clearance :: KeepoutZone -> Target -> Clearance
-clearance (KeepoutZone keepout) (Target s) = Clearance $ S.unions [nudge n s | n <- keepout] \\ s
-
 -- |Check that target fits on board
 checkBoundary :: Board -> Target -> Bool
-checkBoundary board (Target s) = S.foldr' (\x acc -> acc && checkCoordBounds board x) True s
+checkBoundary board Target{..} = S.foldr' (\x acc -> acc && checkCoordBounds board x) True coordinates
 
 -- |Check if a single coordinate is on board
 checkCoordBounds :: Board -> Coordinate -> Bool
@@ -51,15 +51,15 @@ checkShipCount (Shipset ss) boats = ss == (sort $ map boatLength boats)
 -- |Check that the boats are not on each other
 checkOverlap :: [Target] -> Bool
 checkOverlap targets = individualSize == unionSize
-  where individualSize = sum (map (S.size . unwrapT) targets)
-        unionSize = S.size $ S.unions $ map unwrapT targets
+  where individualSize = sum (map (S.size . coordinates) targets)
+        unionSize = S.size $ S.unions $ map coordinates targets
 
 -- |Check that clearance areas are not touching any boats
-checkClearance :: KeepoutZone -> [Target] -> Bool
-checkClearance keepout targets = S.null $ targetSet `S.intersection` clearanceSet
-  where targetSet = S.unions $ map unwrapT targets
-        clearanceSet = S.unions $ map (unwrapC . clearance keepout) targets
+checkClearance :: [Target] -> Bool
+checkClearance targets = S.null $ targetSet `S.intersection` clearanceSet
+  where targetSet = S.unions $ map coordinates targets
+        clearanceSet = S.unions $ map clearance targets
 
 -- |False if the ship is sunk, true otherwise (may have hits, though)
 isAfloat :: Target -> Bool
-isAfloat (Target a) = not $ null a
+isAfloat Target{..} = not $ null coordinates

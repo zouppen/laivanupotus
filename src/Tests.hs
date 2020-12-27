@@ -30,7 +30,7 @@ boatPairs = [(boat1, [(0,0)])
             ]
 
 testBoatCreation = TestList $ map test boatPairs
-  where test (boat,reference) = TestCase $ assertEqual (show boat) (Target $ freeform reference) (renderBoat boat)
+  where test (boat,reference) = TestCase $ assertEqual (show boat) (renderBoatRaw adjacentKeepout $ freeform reference) (renderBoat adjacentKeepout boat)
 
 -- Boat hit tests
 
@@ -50,7 +50,7 @@ strikes = [ (boat1, [ ((0,0), Sink)
 
 testStrikes = TestList $ map testStrike strikes
 
-testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat boat) shots
+testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat adjacentKeepout boat) shots
   where hitter remBoat (xy,expect) = toTuple expect $ strikeTarget (Coordinate xy) remBoat
         toTuple expect StrikeTargetResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
 
@@ -77,8 +77,8 @@ clearances = [ (boat1, [(0,-1)
 testClearances = TestList $ map toCase clearances
   where toCase (boat,expected) = TestCase $
           (assertEqual $ "Clearances of " ++ show boat)
-          (Clearance $ freeform expected)
-          (clearance adjacentKeepout $ renderBoat boat)
+          (freeform expected)
+          (clearance $ renderBoat adjacentKeepout boat)
 
 bounds = [ (boat1, True, Board{ minX = 0
                               , minY = 0
@@ -101,7 +101,7 @@ testBounds = TestList $ map toCase bounds
   where toCase (boat, expected, board) = TestCase $
           (assertEqual $ "Boundaries of " ++ show boat ++ " and "  ++ show board)
           expected
-          (checkBoundary board $ renderBoat boat)
+          (checkBoundary board $ renderBoat adjacentKeepout boat)
 
 -- Ship count test
 
@@ -111,7 +111,7 @@ testShipCount = TestList
   , False ~=? checkShipCount shipsetFin [boat5v, boat4h, boat3v, boat3w, boat3h, boat2h]
   ]
 
-checkOverlap' = checkOverlap . map renderBoat
+checkOverlap' = checkOverlap . map (renderBoat adjacentKeepout)
 
 overlapTestSubjects = TestList
   [ True ~=? checkOverlap' []
@@ -123,8 +123,8 @@ overlapTestSubjects = TestList
 
 -- Clearances
 
-checkClear' = checkClearance adjacentKeepout . map renderBoat
-checkClearFull = checkClearance fullKeepout . map renderBoat
+checkClear' = checkClearance . map (renderBoat adjacentKeepout)
+checkClearFull = checkClearance . map (renderBoat fullKeepout)
 
 testClearancesFull = TestList
   [ True ~=? checkClear' []

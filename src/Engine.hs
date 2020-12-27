@@ -26,10 +26,10 @@ createGame :: Rules -> [Boat] -> LayoutMonad Game
 createGame Rules{..} boats = do
   mapM (check OutOfBounds . checkBoundary board) targets
   check Overlapping $ checkOverlap targets
-  check TooClose $ checkClearance keepout targets
+  check TooClose $ checkClearance targets
   check CountMismatch $ checkShipCount shipset boats
   pure $ Game board targets empty
-  where targets = map renderBoat boats
+  where targets = map (renderBoat keepout) boats
 
 -- |Strikes given coordinate
 strike :: Monad m => Coordinate -> StrikeMonad m Outcome
