@@ -4,14 +4,13 @@ module Engine.Base where
 import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
-import Data.Map.Strict (Map, fromSet, empty)
+import Data.Map.Strict (Map, fromSet, empty, singleton, insert)
 
 import Types
 import Engine.Internal
 
-data StrikeTargetResult = StrikeTargetResult { outcome   :: Outcome
+data StrikeTargetResult = StrikeTargetResult { exposed   :: Map Coordinate Outcome
                                              , boatAfter :: Target
-                                             , exposed   :: Map Coordinate Outcome
                                              } deriving (Show, Eq)
 
 -- |Render a boat from boat definition
@@ -28,14 +27,11 @@ renderBoatRaw (KeepoutZone keepout) coordinates = Target{..}
 strikeTarget :: Coordinate -> Target -> StrikeTargetResult
 strikeTarget x Target{..} = StrikeTargetResult{..}
   where after = S.delete x coordinates
-        outcome = if S.member x coordinates
+        exposed = if S.member x coordinates
                   then if S.null after
-                       then Sink
-                       else Hit
-                  else Miss
-        exposed = if outcome == Sink
-                  then fromSet (const Close) clearance
-                  else empty
+                       then insert x Sink $ fromSet (const Close) clearance
+                       else singleton x Hit
+                  else empty -- Miss
         boatAfter = Target{coordinates=after,..}
 
 -- |Nudge coordinates by given constant

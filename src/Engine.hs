@@ -9,7 +9,7 @@ module Engine ( createGame
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
-import Data.Map.Strict (Map, empty, insert, notMember, union)
+import Data.Map.Strict (Map, empty, insert, notMember, unions, singleton, (!))
 import Data.Functor.Identity (Identity)
 
 import Engine.Base
@@ -38,17 +38,15 @@ strike coord = do
   check InvalidCoordinate $ checkCoordBounds gBoard coord
   check AlreadyHit $ coord `notMember` history
   -- Trying to hit one by one, initial state is not hit (Miss) of course.
-  let (targetsAfter, (outcome,exposed)) = runState (mapM (strikeOne coord) targets) (Miss, empty)
-      newHistory                        = exposed `union` insert coord outcome history
+  let results = map (strikeTarget coord) targets
+      targetsAfter = map boatAfter results
+      -- Build history. Ordering is significant. Least significant is
+      -- the default (Miss), then recent strike. History has
+      -- precedence because old hits may become Closes later and we
+      -- don't want to mess the stats.
+      newHistory = unions [history, unions $ map exposed results, singleton coord Miss]
   put $ Game gBoard targetsAfter newHistory
-  pure outcome
-
--- |Stateful strike, collects hit/sink if any.
-strikeOne :: Coordinate -> Target -> State (Outcome, Map Coordinate Outcome) Target
-strikeOne coord target = do
-  let StrikeTargetResult{..} = strikeTarget coord target
-  when (outcome /= Miss) $ put (outcome, exposed)
-  pure boatAfter
+  pure $ newHistory ! coord
 
 shipsLeft :: Monad m => StrikeMonad m Int
 shipsLeft = do

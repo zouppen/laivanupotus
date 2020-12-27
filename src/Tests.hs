@@ -5,6 +5,7 @@ import Control.Monad.State.Lazy
 import Control.Monad.Trans.Writer.Lazy
 import Control.Monad.Except (MonadError, ExceptT, runExcept, runExceptT, catchError)
 import Data.Set (Set,fromList)
+import qualified Data.Map.Strict as M
 import Data.List
 import Test.HUnit
 import Data.Either
@@ -51,8 +52,9 @@ strikes = [ (boat1, [ ((0,0), Sink)
 testStrikes = TestList $ map testStrike strikes
 
 testStrike (boat, shots) = TestList $ snd $ mapAccumL hitter (renderBoat adjacentKeepout boat) shots
-  where hitter remBoat (xy,expect) = toTuple expect $ strikeTarget (Coordinate xy) remBoat
-        toTuple expect StrikeTargetResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect outcome))
+  where hitter remBoat (xy,expect) = toTuple (Coordinate xy) expect $ strikeTarget (Coordinate xy) remBoat
+        toTuple xy expect StrikeTargetResult{..} = (boatAfter, TestCase (assertEqual ("Testing "++show boat) expect (dig xy exposed)))
+        dig = M.findWithDefault Miss
 
 -- Clearance area test, single boat
 
