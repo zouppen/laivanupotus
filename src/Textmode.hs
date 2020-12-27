@@ -33,14 +33,16 @@ renderToText showBoats game = "  " <> mconcat [ (' ':letterify x) | x <- xs] <> 
         status coord = render coord <> "│"
         separator start mid end = "  " <> start <> mconcat [ "──" <> sep | x <- xs, let sep = if x == maxX then end else mid ] <> "\n"
         letterify x = [toEnum $ x + fromEnum 'Ａ']
-        emoji x = case x of
-          Nothing   -> "  "
-          Just Hit  -> "🔥"
-          Just Miss -> "🌊"
-          Just Sink -> "💀"
         render coord = if showBoats && shipLookup targets coord
                        then "🚢"
                        else emoji $ history !? coord
+
+emoji :: Maybe Outcome -> [Char]
+emoji x = case x of
+            Nothing   -> "  "
+            Just Hit  -> "🔥"
+            Just Miss -> "🌊"
+            Just Sink -> "💀"
 
 type Parser = Parsec Void String
 type World m = S.StateT (Game, StdGen) m
