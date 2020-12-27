@@ -13,6 +13,7 @@ import Text.Megaparsec.Char.Lexer (decimal)
 import Data.Char (toUpper)
 import Data.Void (Void)
 import qualified Control.Monad.State.Lazy as S
+import System.Console.Readline (addHistory, readline)
 
 import Engine
 import Types
@@ -81,15 +82,21 @@ main = do
   initialState <- do
     gen <- newStdGen
     pure $ S.runState (newGame teleGameDef) gen
-  void $ flip S.runStateT initialState $ forever $ do
-    lift $ putStr "> "
-    line <- lift $ getLine
-    (Game{..}, _) <- S.get
-    case parse (commandParser gBoard) "" line of
-      Left e    -> lift $ putStr $ cleanError $ errorBundlePretty e
-      Right cmd -> do
-        out <- cmd
-        lift $ putStrLn out
+  void $ S.runStateT loop initialState
+
+loop = do
+  mbLine <- lift $ readline "> "
+  case mbLine of
+    Nothing -> lift $ putStrLn "(quit)"
+    Just line -> do
+      lift $ addHistory line
+      (Game{..}, _) <- S.get
+      case parse (commandParser gBoard) "" line of
+        Left e    -> lift $ putStr $ cleanError $ errorBundlePretty e
+        Right cmd -> do
+          out <- cmd
+          lift $ putStrLn out
+      loop
 
 -- |Remove file name and the actual user input from the error
 -- message. Makes messages easier to understand on console. This might
