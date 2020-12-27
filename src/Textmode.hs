@@ -125,6 +125,7 @@ worldStrike coord = do
   (old,gen) <- S.get
   case run old $ strike coord of
     (Left AlreadyHit, _) -> pure "error: You have already hit that coordinate!\n"
+    (Left Exposed, _)    -> pure "error: A ship cannot be there! Too close of a sunken ship.\n"
     (Left e, _)          -> pure $ "error: " ++ show e ++ "\n"
     (Right a, new) -> do
       S.put (new, gen)
