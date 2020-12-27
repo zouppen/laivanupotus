@@ -125,11 +125,11 @@ worldStrike coord = do
     (Left AlreadyHit, _) -> pure "error: You have already hit that coordinate!"
     (Left e, _)          -> pure $ "error: " ++ show e
     (Right a, new) -> do
+      S.put (new, gen)
       let msg = case a of
                   Hit -> "HIT!"
                   Miss -> "miss"
                   Sink -> "HIT! Target destroyed."
-      S.put (new, gen)
       pure $ "Fire... " ++ msg ++ " " ++ emoji (Just a)
 
 worldNew :: Monad m => World m String
