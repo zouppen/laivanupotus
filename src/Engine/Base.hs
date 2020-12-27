@@ -24,13 +24,14 @@ renderBoatRaw (KeepoutZone keepout) coordinates = Target{..}
 
 -- |Try to hit the boat
 strikeTarget :: Coordinate -> Target -> StrikeTargetResult
-strikeTarget x (Target before c) = StrikeTargetResult outcome $ Target after c
-  where after = S.delete x before
-        outcome = if S.member x before
+strikeTarget x Target{..} = StrikeTargetResult{..}
+  where after = S.delete x coordinates
+        outcome = if S.member x coordinates
                   then if S.null after
                        then Sink
                        else Hit
                   else Miss
+        boatAfter = Target{coordinates=after,..}
 
 -- |Nudge coordinates by given constant
 nudge :: (Int, Int) -> Set Coordinate -> Set Coordinate
