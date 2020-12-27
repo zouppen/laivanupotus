@@ -14,6 +14,7 @@ import Data.Char (toUpper)
 import Data.Void (Void)
 import qualified Control.Monad.State.Lazy as S
 import System.Console.Readline (addHistory, readline)
+import Data.Ix (inRange)
 
 import Engine
 import Types
@@ -52,7 +53,7 @@ parseCoord :: Board -> Parser Coordinate
 parseCoord Board{..} = do
   x <- label "x coordinate" $ token (\x -> testEnum 'A' minX maxX x <|> testEnum 'a' minX maxX x) mempty
   hidden space
-  y <- label "y coordinate" $ validateAhead (testBounds minY maxY) decimal
+  y <- label "y coordinate" $ validateAhead (inRange (minY,maxY)) decimal
   pure $ Coordinate (x,y)
 
 -- |Tests the condition while look-aheading. Otherwise works
@@ -87,6 +88,7 @@ main = do
   putStr helpText
   void $ S.runStateT loop initialState
 
+loop :: World IO ()
 loop = do
   mbLine <- lift $ readline "> "
   case mbLine of
@@ -105,19 +107,17 @@ loop = do
 -- message. Makes messages easier to understand on console. This might
 -- be sensitive to format changes in megaparsec. Tested with
 -- megaparsec-7.0.5
+cleanError :: String -> String
 cleanError s = (drop 2 $ dropline $ dropline $ dropline s) ++ "type 'h' to see help\n"
   where dropline = tail . dropWhile (/= '\n')
 
-
+-- |Test if given enum is in bounds (in given number characters from 'start').
 testEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
-testEnum start min max c = if testBounds min max val
+testEnum start min max c = if inRange (min,max) val
                            then Just val
                            else Nothing
   where diff = (fromEnum c) - (fromEnum start)
         val = diff + min
-
-testBounds :: Int -> Int -> Int -> Bool
-testBounds min max x = not (x > max || x < min)
 
 worldStrike :: Monad m => Coordinate -> World m String
 worldStrike coord = do
