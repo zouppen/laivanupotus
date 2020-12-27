@@ -47,9 +47,9 @@ type World m = S.StateT (Game, StdGen) m
 -- |Parse coordinate in character-number format (such as "B5")
 parseCoord :: Board -> Parser Coordinate
 parseCoord Board{..} = do
-  x <- label "X coordinate" $ token (\x -> testEnum 'A' minX maxX x <|> testEnum 'a' minX maxX x) mempty
-  space
-  y <- label "Y coordinate" $ validateAhead (testBounds minY maxY) decimal
+  x <- label "x coordinate" $ token (\x -> testEnum 'A' minX maxX x <|> testEnum 'a' minX maxX x) mempty
+  hidden space
+  y <- label "y coordinate" $ validateAhead (testBounds minY maxY) decimal
   pure $ Coordinate (x,y)
 
 -- |Tests the condition while look-aheading. Otherwise works
@@ -63,18 +63,18 @@ validateAhead f p = do
 
 commandParser :: Monad m => Board -> Parser (World m String)
 commandParser board = do
-  space
+  hidden space
   out <- worldStrike <$> try (parseCoord board) <|>
          cmd 'h' (pure helpText) <|>
          cmd 'n' worldNew <|>
          cmd 'p' (worldPrint False) <|>
          cmd 'c' (worldPrint True)
-  space
+  hidden space
   eof
   pure out
   where cmd c v = try (simple c) >> pure v
         simple :: Char -> Parser ()
-        simple c = void $ char c <|> char (toUpper c)
+        simple c = void $ char c <|> hidden (char (toUpper c))
 
 main :: IO ()
 main = do
@@ -85,11 +85,19 @@ main = do
     lift $ putStr "> "
     line <- lift $ getLine
     (Game{..}, _) <- S.get
-    case parse (commandParser gBoard) "Parse error" line of
-      Left e    -> lift $ putStrLn $ errorBundlePretty e
+    case parse (commandParser gBoard) "" line of
+      Left e    -> lift $ putStr $ cleanError $ errorBundlePretty e
       Right cmd -> do
         out <- cmd
         lift $ putStrLn out
+
+-- |Remove file name and the actual user input from the error
+-- message. Makes messages easier to understand on console. This might
+-- be sensitive to format changes in megaparsec. Tested with
+-- megaparsec-7.0.5
+cleanError s = (drop 2 $ dropline $ dropline $ dropline s) ++ "type 'h' to see help\n"
+  where dropline = tail . dropWhile (/= '\n')
+
 
 testEnum :: (Enum a) => a -> Int -> Int -> a -> Maybe Int
 testEnum start min max c = if testBounds min max val
