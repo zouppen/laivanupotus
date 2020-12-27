@@ -70,7 +70,6 @@ commandParser :: Monad m => Board -> Parser (World m String)
 commandParser board = do
   hidden space
   out <- worldStrike <$> try (parseCoord board) <|>
-         cmd 'h' (pure helpText) <|>
          cmd 'n' worldNew <|>
          cmd 'p' (worldPrint False) <|>
          cmd 'c' (worldPrint True)
@@ -86,7 +85,7 @@ main = do
   initialState <- do
     gen <- newStdGen
     pure $ S.runState (newGame teleGameDef) gen
-  putStr helpText
+  putStrLn "Welcome to hBattleShip. Type 'p' to print board!"
   void $ S.runStateT loop initialState
 
 loop :: World IO ()
@@ -146,14 +145,6 @@ worldPrint cheat = do
   (game,_) <- S.get
   pure $ mashUp (lines $ renderToText cheat game) (statsLines game)
 
-helpText =
-  "Tervetuloa laivanupotukseen!\n\n\
-  \h\tNäytä tämä ohje\n\
-  \n\tAloita uusi peli\n\
-  \xy\tHyökkää annettuun koordinaattiin (esim. A4)\n\
-  \p\tTulosta pelitilanne\n\
-  \c\tHuijaa!\n"
-
 -- |Combine text output of a and b. List length is determined by length of 'a'.
 mashUp :: [String] -> [String] -> String
 mashUp a b = unlines $ zipWith (++) a (b ++ repeat "")
@@ -171,13 +162,13 @@ statsLines game =
   ,        "   ───────────┴───────────"
   , ""
   , ""
-  , "   Legend"
-  , "   ────┬──────"
-  , "    X  │ hit"
-  , "   *X* │ sink"
-  , "    ~  │ miss"
-  , "    -  │ clear"
-  , "   ────┴──────"
+  , "   Legend          Commands"
+  , "   ────┬──────     ───┬─────────────"
+  , "    X  │ hit       n  │ New game"
+  , "   *X* │ sink      xy │ Attack to xy"
+  , "    ~  │ miss      p  │ Print board"
+  , "    -  │ clear     c  │ Cheat!"
+  , "   ────┴──────     ───┴─────────────"
   ] ++ repeat ""
   where Stats{..} = renderStats game
         Board{..} = gBoard game
