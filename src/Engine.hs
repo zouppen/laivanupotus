@@ -5,6 +5,8 @@ module Engine ( createGame
               , StrikeMonad
               , LayoutMonad
               , run
+              -- Re-exports
+              , renderStats
               ) where
 
 import Control.Monad.Except

@@ -6,6 +6,7 @@ module Types ( Board(..)
              , Outcome(..)
              , Rules(..)
              , StrikeFail(..)
+             , Stats(..)
              -- Re-exports
              , Coordinate(..)
              , KeepoutZone
@@ -57,3 +58,11 @@ data Game = Game { gBoard   :: Board                  -- ^Board settings
                  , targets  :: [Target]               -- ^Target list
                  , history  :: Map Coordinate Outcome -- ^Map of strikes
                  } deriving (Show, Eq)
+
+-- |Stats, rendered from Game
+data Stats = Stats { boatsSunk  :: Int -- ^Sunken ships
+                   , boatsTotal :: Int -- ^Total number of ships
+                   , known      :: Int -- ^Known coordinate count
+                   , hits       :: Int -- ^Hit count
+                   , turns      :: Int -- ^Turns played
+                   } deriving (Show)

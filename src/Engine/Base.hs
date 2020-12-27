@@ -5,6 +5,7 @@ import Data.List (sort)
 import Data.Set (Set, (\\), fromList, toList)
 import qualified Data.Set as S
 import Data.Map.Strict (Map, fromSet, empty, singleton, insert)
+import qualified Data.Map.Strict as M
 
 import Types
 import Engine.Internal
@@ -65,3 +66,22 @@ checkClearance targets = S.null $ targetSet `S.intersection` clearanceSet
 -- |False if the ship is sunk, true otherwise (may have hits, though)
 isAfloat :: Target -> Bool
 isAfloat Target{..} = not $ null coordinates
+
+-- |Collect game statistics by digging game structure.
+renderStats :: Game -> Stats
+renderStats Game{..} = Stats{..}
+  where boatsSunk  = length $ filter (S.null . coordinates) targets
+        boatsTotal = length targets
+        known      = M.size history
+        hits       = M.foldr (summer hit) 0 history
+        turns      = M.foldr (summer turner) 0 history
+        -- Count only when hit something
+        hit Hit    = 1
+        hit Sink   = 1
+        hit _      = 0
+        -- Turn is everything except exposed cells
+        turner Close = 0
+        turner _     = 1
+
+summer :: Num b => (a -> b) -> a -> b -> b
+summer f val acc = acc + f val

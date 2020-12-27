@@ -144,7 +144,7 @@ worldNew = do
 worldPrint :: Monad m => Bool -> World m String
 worldPrint cheat = do
   (game,_) <- S.get
-  pure $ renderToText cheat game
+  pure $ mashUp (lines $ renderToText cheat game) (statsLines game)
 
 helpText =
   "Tervetuloa laivanupotukseen!\n\n\
@@ -153,3 +153,32 @@ helpText =
   \xy\tHyökkää annettuun koordinaattiin (esim. A4)\n\
   \p\tTulosta pelitilanne\n\
   \c\tHuijaa!\n"
+
+-- |Combine text output of a and b. List length is determined by length of 'a'.
+mashUp :: [String] -> [String] -> String
+mashUp a b = unlines $ zipWith (++) a (b ++ repeat "")
+
+statsLines :: Game -> [String]
+statsLines game =
+  [ ""
+  , ""
+  , printf "   Turn #%d" turns
+  ,        "   ───────────┬───────────"
+  , printf "   Boats left │ %d / %d" (boatsTotal-boatsSunk) boatsTotal
+  , printf "   Hit ratio  │ %0.1f %%" (ratio::Double)
+  , printf "   Hits       │ %d" hits
+  , printf "   Exposed    │ %d / %d" known ((maxY-minY+1)*(maxX-minX+1))
+  ,        "   ───────────┴───────────"
+  , ""
+  , ""
+  , "   Legend"
+  , "   ────┬──────"
+  , "    X  │ hit"
+  , "   *X* │ sink"
+  , "    ~  │ miss"
+  , "    -  │ clear"
+  , "   ────┴──────"
+  ] ++ repeat ""
+  where Stats{..} = renderStats game
+        Board{..} = gBoard game
+        ratio = if turns == 0 then 0 else 100 * fromIntegral hits / fromIntegral turns
