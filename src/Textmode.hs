@@ -40,10 +40,11 @@ renderToText showBoats game = "   " <> mconcat [ (' ':letterify x) | x <- xs] <>
 
 emoji :: Maybe Outcome -> [Char]
 emoji x = case x of
-            Nothing   -> "   "
-            Just Hit  -> " X "
-            Just Miss -> " ~ "
-            Just Sink -> "*X*"
+            Nothing    -> "   "
+            Just Hit   -> " X "
+            Just Miss  -> " ~ "
+            Just Sink  -> "*X*"
+            Just Close -> " - "
 
 type Parser = Parsec Void String
 type World m = S.StateT (Game, StdGen) m
