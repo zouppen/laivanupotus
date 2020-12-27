@@ -84,6 +84,7 @@ main = do
   initialState <- do
     gen <- newStdGen
     pure $ S.runState (newGame teleGameDef) gen
+  putStr helpText
   void $ S.runStateT loop initialState
 
 loop = do
@@ -97,7 +98,7 @@ loop = do
         Left e    -> lift $ putStr $ cleanError $ errorBundlePretty e
         Right cmd -> do
           out <- cmd
-          lift $ putStrLn out
+          lift $ putStr out
       loop
 
 -- |Remove file name and the actual user input from the error
@@ -122,21 +123,21 @@ worldStrike :: Monad m => Coordinate -> World m String
 worldStrike coord = do
   (old,gen) <- S.get
   case run old $ strike coord of
-    (Left AlreadyHit, _) -> pure "error: You have already hit that coordinate!"
-    (Left e, _)          -> pure $ "error: " ++ show e
+    (Left AlreadyHit, _) -> pure "error: You have already hit that coordinate!\n"
+    (Left e, _)          -> pure $ "error: " ++ show e ++ "\n"
     (Right a, new) -> do
       S.put (new, gen)
       let msg = case a of
                   Hit -> "HIT!"
                   Miss -> "miss"
                   Sink -> "HIT! Target destroyed."
-      pure $ "Fire... " ++ msg ++ " " ++ emoji (Just a)
+      pure $ "Fire... " ++ msg ++ " " ++ emoji (Just a) ++ "\n"
 
 worldNew :: Monad m => World m String
 worldNew = do
   (_,gen) <- S.get
   S.put $ S.runState (newGame teleGameDef) gen
-  return "Started new game"
+  return "Started new game\n"
 
 worldPrint :: Monad m => Bool -> World m String
 worldPrint cheat = do
