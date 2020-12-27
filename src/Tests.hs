@@ -219,10 +219,13 @@ testGame1 = writerToTest $ do
         strikeTest (Right Hit ~=?) (9,8)
         strikeTest (Right Hit ~=?) (9,7)
         strikeTest (Right Hit ~=?) (9,6)
+        strikeTest (Right Miss ~=?) (8,6) -- Hitting near
         catchAndReport (Right 4 ~=?) shipsLeft
         -- And now drop all of them
         strikeTest (Right Sink ~=?) (9,5)
         catchAndReport (Right 3 ~=?) shipsLeft
+        strikeTest (Left Exposed ~=?) (8,5) -- Has been exposed (sunken ship next to it)
+        strikeTest (Left AlreadyHit ~=?) (8,6) -- Striked but exposed later, should stay AlreadyHit
         strikeTest (Right Sink ~=?) (1,4)
         catchAndReport (Right 2 ~=?) shipsLeft
         strikeTest (Right Sink ~=?) (4,6)

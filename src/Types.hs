@@ -29,6 +29,7 @@ data Outcome = Miss  -- ^Target missed
 
 data StrikeFail = InvalidCoordinate -- ^Coordinate is not valid.
                 | AlreadyHit        -- ^Target is already hit.
+                | Exposed           -- ^We know what's there already.
                 deriving (Show, Eq)
 
 data Boat = Boat { boatX           :: Int

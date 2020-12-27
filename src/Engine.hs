@@ -9,7 +9,7 @@ module Engine ( createGame
 
 import Control.Monad.Except
 import Control.Monad.State.Lazy
-import Data.Map.Strict (Map, empty, insert, notMember, unions, singleton, (!))
+import Data.Map.Strict (Map, empty, insert, notMember, unions, singleton, (!), (!?))
 import Data.Functor.Identity (Identity)
 
 import Engine.Base
@@ -36,7 +36,10 @@ strike :: Monad m => Coordinate -> StrikeMonad m Outcome
 strike coord = do
   Game{..} <- get
   check InvalidCoordinate $ checkCoordBounds gBoard coord
-  check AlreadyHit $ coord `notMember` history
+  case history !? coord of
+    Just Close -> throwError Exposed
+    Just     _ -> throwError AlreadyHit
+    _          -> pure ()
   -- Trying to hit one by one, initial state is not hit (Miss) of course.
   let results = map (strikeTarget coord) targets
       targetsAfter = map boatAfter results
