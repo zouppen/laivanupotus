@@ -21,7 +21,10 @@ import Engine.Internal
 
 data BoatOrientation = Horizontal | Vertical deriving (Show, Eq)
 
-data Outcome = Miss | Hit | Sink deriving (Show, Eq)
+data Outcome = Miss  -- ^Target missed
+             | Hit   -- ^Target hit, didn't make it sink.
+             | Sink  -- ^Target hit and sink
+             deriving (Show, Eq)
 
 data StrikeFail = InvalidCoordinate | AlreadyHit deriving (Show, Eq)
 
